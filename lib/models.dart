@@ -71,6 +71,7 @@ class Ladder {
   int numLives;
   int entryFee;
   List<Game> games;
+  int numGames;
   String type;
   String prize;
   bool hasPrize;
@@ -84,6 +85,7 @@ class Ladder {
     this.numLives,
     this.respawnTime,
     this.games,
+    this.numGames,
     this.type,
     this.hasPrize,
     this.prize,
@@ -102,6 +104,7 @@ class Ladder {
       numLives: data['lives'],
       entryFee: data['entry_fee'],
       type: data['type'] ?? 'coins',
+      numGames: data['num_games'] ?? 0,
     );
   }
 }

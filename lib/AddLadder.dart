@@ -306,8 +306,6 @@ class AddLadderFormProvider extends ChangeNotifier {
 
     if(startDate == null) {
       startDateError = 'You must choose a start date and time!';
-    } else if(startDate.isBefore(DateTime.now())) {
-      startDateError = 'Start Date must not be in the past!';
     } else {
       startDateError = null;
     }

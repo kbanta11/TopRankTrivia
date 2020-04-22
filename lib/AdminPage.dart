@@ -46,11 +46,58 @@ class AdminPage extends StatelessWidget {
                   }
                 );
               },
+            ),
+            SizedBox(height: 15),
+            FlatButton(
+              child: Text('Create Daily Ladders (Tomorrow)'),
+              onPressed: () {
+                DBService().createMultipleLadders();
+              },
+            ),
+            SizedBox(height: 25),
+            StreamProvider<List<Question>>(
+              create: (context) => DBService().streamAllQuestions(),
+              child: Consumer<List<Question>>(
+                builder: (context, questionList, _) {
+                  if(questionList == null)
+                    return Container();
+                  Map<String, List<Question>> categoriesMap = new Map<String, List<Question>>();
+                  questionList.forEach((question) {
+                    if(categoriesMap.containsKey(question.category)) {
+                      categoriesMap[question.category].add(question);
+                    } else {
+                      categoriesMap[question.category] = [question];
+                    }
+                  });
+                  return Column(
+                    children: <Widget>[
+                      Text('Total Questions: ${questionList.length}'),
+                      Text('Total Verified: ${questionList.where((element) => element.isVerified).length}'),
+                      Container(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: categoriesMap.entries.map((e) => Padding(
+                              padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+                              child: Column(
+                                children: <Widget>[
+                                  Text('${e.key}'),
+                                  Text('Total: ${e.value.length}'),
+                                  Text('Verified: ${e.value.where((e) => e.isVerified).length}'),
+                                ],
+                              ),
+                            )).toList(),
+                          ),
+                        )
+                      )
+                    ],
+                  );
+                },
+              ),
             )
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavBar(context: context,),
     );
   }
 }
@@ -142,3 +189,4 @@ class VerifyQuestionDialog extends StatelessWidget {
     );
   }
 }
+

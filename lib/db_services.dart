@@ -11,10 +11,14 @@ class DBService {
   GoogleSignIn _googleSignIn = GoogleSignIn();
 
   Future<String> signInWithGoogle() async {
-    GoogleSignInAccount googleSignInAccount = await _googleSignIn.signIn();
+    GoogleSignInAccount googleSignInAccount = await _googleSignIn.signIn().catchError((error) {
+      print('Google Sign-in Error: $error');
+    });
     GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
     AuthCredential credential = GoogleAuthProvider.getCredential(idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
-    AuthResult authResult = await _auth.signInWithCredential(credential);
+    AuthResult authResult = await _auth.signInWithCredential(credential).catchError((error) {
+      print('Sign in error: $error');
+    });
     final FirebaseUser user = authResult.user;
     print('logged in user: ${user.email}');
     assert(!user.isAnonymous);
@@ -103,6 +107,9 @@ class DBService {
 
   Stream<List<Ladder>> streamLadders({String filter, String userId}) {
     Query query = _db.collection('ladders').where('end_date', isGreaterThanOrEqualTo: DateTime.now());
+    if(filter == 'Upcoming') {
+      query = _db.collection('ladders').where('start_date', isGreaterThanOrEqualTo: DateTime.now());
+    }
     if(filter == 'Complete') {
       query = _db.collection('ladders').where('end_date', isLessThan: DateTime.now());
     }
@@ -115,7 +122,11 @@ class DBService {
   }
 
   Stream<List<Question>> streamUnverifiedQuestions() {
-    return _db.collection('questions').where('is_verified', isEqualTo: null).snapshots().map((snap) => snap.documents.map((doc) => Question.fromFirestore(doc)).toList());
+    return _db.collection('questions').where('is_verified', isEqualTo: null).snapshots().map((snap) => snap.documents.map((doc) => Question.fromFirestore(doc)).toList()).handleError((error) => print('Error getting ladders: $error'));
+  }
+
+  Stream<List<Question>> streamAllQuestions() {
+    return _db.collection('questions').snapshots().map((snap) => snap.documents.map((doc) => Question.fromFirestore(doc)).toList());
   }
   
   Stream<List<Game>> streamGames({Ladder ladder}) {
@@ -152,52 +163,99 @@ class DBService {
     return ladderRef.get().then((value) => Ladder.fromFirestore(value));
   }
 
-  Future<Game> createGame({Ladder ladder, User user, String type}) async {
-    //Create game doc
-    DocumentReference docRef = _db.collection('games').document();
-    WriteBatch batch = _db.batch();
-    batch.setData(docRef, {
-      'id': docRef.documentID,
-      'ladder_id': ladder.id,
-      'user_id': user.userId,
-      'user_displayname': user.displayName,
-      'total_score': 0,
-      'streak': 0,
-      'max_lives': ladder.numLives,
-      'lives_remaining': ladder.numLives,
-      'is_alive': true,
-      'entry_time': DateTime.now(),
-    });
-    //Deduct entry fee from user total
-    DocumentReference userDoc = _db.collection('users').document(user.userId);
-    int currentCoins = await userDoc.get().then((snap) => snap.data['coins']);
-    int currentBars = await userDoc.get().then((snap) => snap.data['bars']);
-    int currentLaddersEntered = await userDoc.get().then((snap) => snap.data['laddersEntered']);
-    if(type == 'coins')
-      currentCoins = currentCoins - ladder.entryFee;
-    if(type == 'bars')
-      currentBars = currentBars - ladder.entryFee;
-    batch.updateData(userDoc, {
-      'coins': currentCoins,
-      'bars': currentBars,
-      'laddersEntered': currentLaddersEntered + 1,
-    });
-    //Add to number of games on ladder
-    DocumentReference ladderDoc = _db.collection('ladders').document(ladder.id);
-    int numGames = await ladderDoc.get().then((value) => value.data['num_games']);
-    List players = await ladderDoc.get().then((value) => value.data['players']);
-    if(numGames == null)
-      numGames = 1;
-    else
-      numGames = numGames + 1;
+  void createMultipleLadders() async {
+    List<Ladder> laddersToAdd = new List<Ladder>();
+    DateTime today = DateTime.now();
+    DateTime tomorrowStart = DateTime(today.add(Duration(days: 1)).year, today.add(Duration(days: 1)).month, today.add(Duration(days: 1)).day);
+    DateTime tomorrowEnd = DateTime(today.add(Duration(days: 2)).year, today.add(Duration(days: 2)).month, today.add(Duration(days: 2)).day);
+    //Add daily ladders -
+    laddersToAdd.add(Ladder(startDate: tomorrowStart, endDate: tomorrowEnd, entryFee: 100, type: 'coins', numLives: 25, respawnTime: Duration(minutes: 0), title: 'Daily 100 (Instant Respawn)'));
+    laddersToAdd.add(Ladder(startDate: tomorrowStart, endDate: tomorrowEnd, entryFee: 100, type: 'coins', numLives: -1, respawnTime: Duration(minutes: 0), title: 'Daily 100 (Unlimited Lives)'));
+    laddersToAdd.add(Ladder(startDate: tomorrowStart, endDate: tomorrowEnd, entryFee: 500, type: 'coins', numLives: 25, respawnTime: Duration(minutes: 0), title: 'Daily 500 (Instant Respawn)'));
+    laddersToAdd.add(Ladder(startDate: tomorrowStart, endDate: tomorrowEnd, entryFee: 500, type: 'coins', numLives: -1, respawnTime: Duration(minutes: 2), title: 'Daily 500 (Unlimited Lives)'));
+    laddersToAdd.add(Ladder(startDate: tomorrowStart, endDate: tomorrowEnd, entryFee: 1000, type: 'coins', numLives: -1, respawnTime: Duration(minutes: 2), title: 'Daily 1000 (Unlimited Lives)'));
+    if(today.weekday == 7) {
 
-    if(players == null)
-      players = [user.userId];
-    else
-      players.add(user.userId);
-    batch.updateData(ladderDoc, {'num_games': numGames, 'players': players});
+    }
+    print('$today/$tomorrowStart/$tomorrowEnd/Day: ${tomorrowEnd.weekday}');
+
+    WriteBatch batch = _db.batch();
+    laddersToAdd.forEach((element) {
+      DocumentReference doc = _db.collection('ladders').document();
+      batch.setData(doc, {
+        'created_by': 'Automation',
+        'created_datetime': DateTime.now(),
+        'title': element.title,
+        'prize': element.prize,
+        'start_date': element.startDate,
+        'end_date': element.endDate,
+        'type': element.type,
+        'entry_fee': element.entryFee,
+        'respawn_minutes': element.respawnTime.inMinutes,
+        'lives': element.numLives,
+        'is_paid_out': false,
+      });
+      print('${element.title}/Entry Fee: ${element.entryFee} ${element.type}/Number of Lives: ${element.numLives}/Respawn Time: ${element.respawnTime.inMinutes}/Start Date: ${element.startDate}/End Date: ${element.endDate}');
+    });
     await batch.commit();
-    return docRef.get().then((snap) => Game.fromFirestore(snap));
+  }
+
+  Future<Game> createGame({Ladder ladder, User user, String type}) async {
+    //make sure user doesn't have game
+    bool hasGame = await _db.collection('games').where('user_id', isEqualTo: user.userId).where('ladder_id', isEqualTo: ladder.id).getDocuments().then((querySnap) {
+      print('getting games');
+      return querySnap.documents.length > 0;
+    });
+    //Create game doc
+    print(hasGame);
+    if(!hasGame) {
+      print('doesnt have game');
+      DocumentReference docRef = _db.collection('games').document();
+      WriteBatch batch = _db.batch();
+      batch.setData(docRef, {
+        'id': docRef.documentID,
+        'ladder_id': ladder.id,
+        'user_id': user.userId,
+        'user_displayname': user.displayName,
+        'total_score': 0,
+        'streak': 0,
+        'max_lives': ladder.numLives,
+        'lives_remaining': ladder.numLives,
+        'is_alive': true,
+        'entry_time': DateTime.now(),
+      });
+      //Deduct entry fee from user total
+      DocumentReference userDoc = _db.collection('users').document(user.userId);
+      int currentCoins = await userDoc.get().then((snap) => snap.data['coins']);
+      int currentBars = await userDoc.get().then((snap) => snap.data['bars']);
+      int currentLaddersEntered = await userDoc.get().then((snap) => snap.data['laddersEntered']);
+      if(type == 'coins')
+        currentCoins = currentCoins - ladder.entryFee;
+      if(type == 'bars')
+        currentBars = currentBars - ladder.entryFee;
+      batch.updateData(userDoc, {
+        'coins': currentCoins,
+        'bars': currentBars,
+        'laddersEntered': currentLaddersEntered + 1,
+      });
+      //Add to number of games on ladder
+      DocumentReference ladderDoc = _db.collection('ladders').document(ladder.id);
+      int numGames = await ladderDoc.get().then((value) => value.data['num_games']);
+      List players = await ladderDoc.get().then((value) => value.data['players']);
+      if(numGames == null)
+        numGames = 1;
+      else
+        numGames = numGames + 1;
+
+      if(players == null)
+        players = [user.userId];
+      else
+        players.add(user.userId);
+      batch.updateData(ladderDoc, {'num_games': numGames, 'players': players});
+      await batch.commit();
+      return docRef.get().then((snap) => Game.fromFirestore(snap));
+    }
+    return null;
   }
 
   Future<void> answerQuestion(Answer ans, Game game, Question question) async {
@@ -211,9 +269,40 @@ class DBService {
     bool isAlive = true;
     if(ans != null && ans.isCcorrect){
       if(streak == null)
-        streak = 0;
-      newScore = currentScore + pow(2, streak);
-      streak = streak + 1;
+        streak = 1;
+      else
+        streak = streak + 1;
+      //update score with new score for question
+      int questionScore;
+      int multiplier = 1;
+      if(streak < 5) {
+        multiplier = 1;
+      } else if (streak ==50) {
+        multiplier = 100;
+      } else if (streak.remainder(5) == 0) {
+        multiplier = streak;
+      } else if (streak < 10) {
+        multiplier = 2;
+      } else if (streak < 15) {
+        multiplier = 4;
+      } else if (streak < 20) {
+        multiplier = 8;
+      } else if (streak < 25) {
+        multiplier = 12;
+      } else if (streak < 30) {
+        multiplier = 16;
+      } else if (streak < 35) {
+        multiplier = 20;
+      } else if (streak < 40) {
+        multiplier = 24;
+      } else if (streak < 45) {
+        multiplier = 28;
+      } else if (streak < 50) {
+        multiplier = 32;
+      }
+      questionScore = multiplier * streak;
+      print('Score: $questionScore');
+      newScore = currentScore + questionScore;
     } else {
       livesLeft = livesLeft - 1;
       isAlive = false;

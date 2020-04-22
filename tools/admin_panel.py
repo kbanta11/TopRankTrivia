@@ -10,6 +10,7 @@ pd.set_option('display.max_columns', None)
 cred = credentials.Certificate('trivia-game-d1e6e-firebase-adminsdk-f1czf-6bfce2b44e.json')
 firebase_admin.initialize_app(cred)
 db = firestore.client()
+csv_path = 'question_files/TriviaQuestions1-Kyle.csv'
 # Subclass QMainWindow to customise your application's main window
 class MainWindow(QMainWindow):
 
@@ -80,7 +81,7 @@ class MainWindow(QMainWindow):
 
 
 class MainQuestionWidget(QWidget):
-	df = pd.read_csv('question_files/TriviaQuestions_Chhuch.csv')
+	df = pd.read_csv(csv_path)
 	df.reset_index()
 	def __init__(self, *args, **kwargs):
 		super(MainQuestionWidget, self).__init__(*args, **kwargs)
@@ -185,7 +186,7 @@ class MainQuestionWidget(QWidget):
 		self.getQuestionDF(self)
 
 	def saveFile(self):
-		self.df.to_csv('question_files/TriviaQuestions_Chhuch.csv', index=False)
+		self.df.to_csv(csv_path, index=False)
 
 	def getQuestionDF(self, s):
 		print(self.df.head())

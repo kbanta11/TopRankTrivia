@@ -573,7 +573,7 @@ class JoinDialog extends StatelessWidget {
         Text('${Helper().dateToString(ladder.endDate)}', style: TextStyle(fontSize: 18)),
         SizedBox(height: 10),
         Text('Number of Lives: ${ladder.numLives < 1 ? 'Unlimited' : ladder.numLives.toString()}', style: TextStyle(fontSize: 18)),
-        Text('Respawn Time: ${ladder.respawnTime.inMinutes.remainder(60) > 0 ? '${ladder.respawnTime.inMinutes} minutes' : '${ladder.respawnTime.inHours} hours'}', style: TextStyle(fontSize: 18)),
+        Text('Respawn Time: ${ladder.respawnTime.inMinutes == 0 ? 'Instant Respawn' : '${ladder.respawnTime.inMinutes} minutes'}', style: TextStyle(fontSize: 18)),
         SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

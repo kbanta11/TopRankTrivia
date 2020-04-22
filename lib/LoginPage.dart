@@ -110,7 +110,7 @@ class LoginPage extends StatelessWidget {
                                           TextSpan(
                                               text: 'privacy policy.',
                                               style: TextStyle(color: Colors.blue,),
-                                              recognizer: TapGestureRecognizer()..onTap = () {launch('https://topranktrivia.com/privacy-policy/');}
+                                              recognizer: TapGestureRecognizer()..onTap = () {launch('https://bantalabz.com/privacy-policy/');}
                                           )
                                         ]
                                     ),

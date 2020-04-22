@@ -11,7 +11,7 @@ description: Prove your trivia dominance against the world and win real prizes!
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 1.0.0+8
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
@@ -27,7 +27,7 @@ dependencies:
   google_sign_in:
   flutter_facebook_login:
   flutter_auth_buttons:
-  flushbar:
+  flushbar: 1.9.1
   font_awesome_flutter:
   intl:
   html_unescape:
@@ -51,7 +51,7 @@ dev_dependencies:
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/TopRankIcon.png"
+  image_path: "assets/images/TopIcon.png"
 
 
 # For information on the generic Dart part of this file, see the

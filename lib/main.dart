@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flushbar/flushbar.dart';
@@ -19,6 +21,7 @@ import 'LadderPage.dart';
 import 'StorePage.dart';
 import 'models.dart';
 
+const String AD_MOB_APP_ID = 'ca-app-pub-5887055143640982~1017841422';
 
 void main() => runApp(MyApp());
 
@@ -26,9 +29,11 @@ class MyApp extends StatelessWidget {
   FirebaseMessaging _fcm = FirebaseMessaging();
   StreamSubscription iosSubscription;
 
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    FirebaseAdMob.instance.initialize(appId: AD_MOB_APP_ID);
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     FirebaseAnalytics analytics = FirebaseAnalytics();
     if (Platform.isIOS) {
@@ -150,7 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     leading: TopMenu(),
                                     // Here we take the value from the MyHomePage object that was created by
                                     // the App.build method, and use it to set our appbar title.
-                                    title: Text('Top Rank Trivia', style: TextStyle(fontSize: 30, color: Colors.white),),
+                                    title: Text('Top Trivia', style: TextStyle(fontSize: 30, color: Colors.white),),
                                   ),
                                   Row(
                                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -409,7 +414,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   child: DropdownButton(
                                     value: ladderListProvider.filter,
                                     icon: Icon(Icons.arrow_drop_down, color: Colors.deepOrangeAccent,),
-                                    items: <String>['Live', 'Complete', 'My Ladders'].map((value) {
+                                    items: <String>['Live', 'My Ladders', 'Upcoming', 'Complete'].map((value) {
                                       return DropdownMenuItem(
                                         value: value,
                                         child: Text(value, style: TextStyle(fontSize: 16, color: Colors.deepOrangeAccent), textAlign: TextAlign.right,),
@@ -435,6 +440,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       child: CircularProgressIndicator(),
                                     );
                                   if(ladderListProvider.filter == 'Live') {
+                                    ladderList = ladderList.where((ladder) => ladder.startDate.isBefore(DateTime.now())).toList();
                                     ladderList.sort((a, b) => a.endDate.compareTo(b.endDate));
                                   }
                                   if(ladderListProvider.filter == 'Complete') {
@@ -463,18 +469,43 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 child: Row(
                                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                   children: <Widget>[
-                                                    Column(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: <Widget>[
-                                                        Container(
-                                                          width: MediaQuery.of(context).size.width - 170,
-                                                          height: 25,
-                                                          child: Text('${ladder.title}    ', style: TextStyle(fontSize: 24), overflow: TextOverflow.ellipsis,),
-                                                        ),
-                                                        Text('${Helper().dateToString(ladder.startDate)}', style: TextStyle(fontFamily: 'Sans'),),
-                                                        Text('${Helper().dateToString(ladder.endDate)}', style: TextStyle(fontFamily: 'Sans'),),
-                                                      ],
+                                                    Expanded(
+                                                      child: Column(
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: <Widget>[
+                                                          Container(
+                                                            width: MediaQuery.of(context).size.width - 170,
+                                                            height: 25,
+                                                            child: Text('${ladder.title}    ', style: TextStyle(fontSize: 24), overflow: TextOverflow.ellipsis,),
+                                                          ),
+                                                          Text('${Helper().dateToString(ladder.startDate)}', style: TextStyle(fontFamily: 'Sans'),),
+                                                          Text('${Helper().dateToString(ladder.endDate)}', style: TextStyle(fontFamily: 'Sans'),),
+                                                          Row(
+                                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                            children: <Widget>[
+                                                              Row(
+                                                                children: <Widget>[
+                                                                  FaIcon(FontAwesomeIcons.users),
+                                                                  SizedBox(width: 5),
+                                                                  Text(ladder.numGames == null ? '0' : ladder.numGames.toString(), style: TextStyle(
+                                                                    fontSize: 18
+                                                                  ),),
+                                                                ]
+                                                              ),
+                                                              Row(
+                                                                children: <Widget>[
+                                                                  FaIcon(FontAwesomeIcons.clock),
+                                                                  SizedBox(width: 5),
+                                                                  Text('${ladder.respawnTime.inMinutes} min.', style: TextStyle(
+                                                                      fontSize: 18
+                                                                  ),)
+                                                                ]
+                                                              )
+                                                            ]
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
                                                     Column(
                                                       mainAxisAlignment: MainAxisAlignment.center,

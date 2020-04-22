@@ -241,14 +241,24 @@ class StorePage extends StatelessWidget {
                                           child: InkWell(
                                             child: Icon(Icons.ondemand_video, color: Colors.white,),
                                             onTap: () async {
-                                              ;
+                                              showDialog(
+                                                context: context,
+                                                builder: (BuildContext context) {
+                                                  return Center(
+                                                    child: CircularProgressIndicator(),
+                                                  );
+                                                }
+                                              );
                                               RewardedVideoAd.instance.listener = (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}) {
                                                 if(event == RewardedVideoAdEvent.rewarded) {
                                                   DBService().rewardCoins(user, 100);
                                                 }
+                                                if(event == RewardedVideoAdEvent.loaded) {
+                                                  Navigator.of(context).pop();
+                                                  RewardedVideoAd.instance.show();
+                                                }
                                               };
-                                              await RewardedVideoAd.instance.load(adUnitId: 'ca-app-pub-5887055143640982/1245405277' ?? RewardedVideoAd.testAdUnitId, targetingInfo: MobileAdTargetingInfo(testDevices: ['2A964E13F4310B0C3E0B13C89E35FD98']));
-                                              await RewardedVideoAd.instance.show();
+                                              await RewardedVideoAd.instance.load(adUnitId: 'ca-app-pub-5887055143640982/1245405277' ?? RewardedVideoAd.testAdUnitId, targetingInfo: MobileAdTargetingInfo(testDevices: ['2A964E13F4310B0C3E0B13C89E35FD98','2EAF3CA98C317AA4482F535CA1094A23', 'F358A854E8C08E90BDD900D8B4B97846']));
                                             },
                                           ),
                                         ),

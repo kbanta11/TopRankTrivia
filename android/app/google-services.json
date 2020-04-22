@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "747289854650-7oekmropaknofj55icjcs68k1lm49lo1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.triviagame.app",
+            "certificate_hash": "6eef614f48532b618c71dc81b33e180c23d4225b"
+          }
+        },
+        {
+          "client_id": "747289854650-j2e5d1ov29b1lds81rjr84r2f0aqco1m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.triviagame.app",
+            "certificate_hash": "f48251e4b66a537d0c5ffc80432ffe745234e8ab"
+          }
+        },
+        {
           "client_id": "747289854650-f7irtnmjukeue63o8ev3j34f80fek7j6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -40,9 +56,9 @@
               "client_type": 3
             }
           ]
-        },
-        "admob_app_id": "ca-app-pub-5887055143640982~1017841422"
-      }
+        }
+      },
+      "admob_app_id": "ca-app-pub-5887055143640982~1017841422"
     }
   ],
   "configuration_version": "1"

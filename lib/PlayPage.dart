@@ -10,9 +10,7 @@ import 'LoginPage.dart';
 import 'models.dart';
 import 'db_services.dart';
 
-const String AD_MOB_APP_ID = 'ca-app-pub-5887055143640982~1017841422';
 //const String AD_MOB_TEST_DEVICE;
-const String AD_MOB_AD_ID = 'ca-app-pub-5887055143640982/1448058598';
 
 class PlayPage extends StatefulWidget {
   Ladder ladder;
@@ -61,7 +59,7 @@ class PlayPageState extends State<PlayPage> {
                   leading: TopMenu(),
                   backgroundColor: Colors.transparent,
                   elevation: 0,
-                  title: Text('Top Rank Trivia', style: TextStyle(fontSize: 28, color: Colors.white),),
+                  title: Text('Top Trivia', style: TextStyle(fontSize: 28, color: Colors.white),),
                 ),
                 backgroundColor: Colors.transparent,
                 body: ChangeNotifierProvider<GameProvider>(
@@ -94,7 +92,17 @@ class PlayPageState extends State<PlayPage> {
                                       onTap: () async {
                                         if(!gettingQuestion) {
                                           gettingQuestion = true;
-                                          await gp.getQuestion(game);
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return Center(
+                                                child: CircularProgressIndicator(),
+                                              );
+                                            }
+                                          );
+                                          await gp.getQuestion(game).then((_) {
+                                            Navigator.of(context).pop();
+                                          });
                                           gettingQuestion = false;
                                         }
                                       },
@@ -129,31 +137,49 @@ class PlayPageState extends State<PlayPage> {
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: <Widget>[
                                           Text('Score: ${game == null ? '' : game.totalScore}', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-                                          Text('Pts: ${game == null ? '' : pow(2, game.streak)}', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),)
+                                          Text('Question: ${game == null ? '' : game.streak == null ? '1' : game.streak + 1} x ${gp.getMultiplier(game.streak + 1 ?? 1)}', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),)
                                         ],
                                       ),
                                     ),
                                   ),
                                   Container(
                                     child: !gp.isAnswered ? Container() : Padding(
-                                      padding: EdgeInsets.fromLTRB(0, 15, 0, 15),
+                                      padding: EdgeInsets.fromLTRB(5, 15, 5, 15),
                                       child: Center(
-                                          child: FlatButton(
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25))),
-                                            child: Text('${gp.chosenAnswer != null && gp.chosenAnswer.isCcorrect ? 'Next Question!' : 'Back to Ladder'}', style: TextStyle(fontSize: 24),),
-                                            color: Colors.deepOrangeAccent,
-                                            onPressed: () async {
-                                              if(gp.chosenAnswer != null && gp.chosenAnswer.isCcorrect) {
-                                                if(!gettingQuestion){
-                                                  gettingQuestion = true;
-                                                  await gp.getQuestion(game);
-                                                  gettingQuestion = false;
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              image: DecorationImage(
+                                                image: AssetImage('assets/images/StartGameBtn.png'),
+                                                fit: BoxFit.fill
+                                              )
+                                            ),
+                                            child: FlatButton(
+                                              //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25))),
+                                              child: Text('${gp.chosenAnswer != null && gp.chosenAnswer.isCcorrect ? 'Next Question!' : 'Back to Ladder'}', style: TextStyle(fontSize: 24, color: Colors.white),),
+                                              color: Colors.transparent,
+                                              onPressed: () async {
+                                                if(gp.chosenAnswer != null && gp.chosenAnswer.isCcorrect) {
+                                                  if(!gettingQuestion){
+                                                    gettingQuestion = true;
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext context) {
+                                                        return Center(
+                                                          child: CircularProgressIndicator()
+                                                        );
+                                                      }
+                                                    );
+                                                    await gp.getQuestion(game).then((_) {
+                                                      Navigator.of(context).pop();
+                                                    });
+                                                    gettingQuestion = false;
+                                                  }
+                                                } else {
+                                                  Navigator.push(context, MaterialPageRoute(builder: (context) => LadderPage(ladder)));
                                                 }
-                                              } else {
-                                                Navigator.push(context, MaterialPageRoute(builder: (context) => LadderPage(ladder)));
-                                              }
-                                            },
-                                          )
+                                              },
+                                            ),
+                                          ),
                                       ),
                                     ),
                                   ),
@@ -395,5 +421,35 @@ class GameProvider extends ChangeNotifier {
   void questionTimeout(Game game, Question question) {
     print('Question Timeout');
     answerQuestion(null, game, question);
+  }
+
+  int getMultiplier(int streak) {
+    int multiplier = 1;
+    if(streak < 5) {
+      multiplier = 1;
+    } else if (streak ==50) {
+      multiplier = 100;
+    } else if (streak.remainder(5) == 0) {
+      multiplier = streak;
+    } else if (streak < 10) {
+      multiplier = 2;
+    } else if (streak < 15) {
+      multiplier = 4;
+    } else if (streak < 20) {
+      multiplier = 8;
+    } else if (streak < 25) {
+      multiplier = 12;
+    } else if (streak < 30) {
+      multiplier = 16;
+    } else if (streak < 35) {
+      multiplier = 20;
+    } else if (streak < 40) {
+      multiplier = 24;
+    } else if (streak < 45) {
+      multiplier = 28;
+    } else if (streak < 50) {
+      multiplier = 32;
+    }
+    return multiplier;
   }
 }
