@@ -29,6 +29,16 @@ class LoginPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Container(
+                      height: 150,
+                      width: 150,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/TopIcon.png'),
+                        )
+                      )
+                    ),
+                    SizedBox(height: 25,),
+                    Container(
                       decoration: BoxDecoration(
                           image: DecorationImage(
                               image: AssetImage('assets/images/LoginPanelbg.png'),

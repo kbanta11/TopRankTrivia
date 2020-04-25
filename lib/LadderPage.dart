@@ -609,7 +609,16 @@ class JoinDialog extends StatelessWidget {
                 ],
               ),
               onPressed: () async {
-                Game _game = await DBService().createGame(ladder: ladder, user: currentUser, type: ladder.type);
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                );
+                Game _game = await DBService().createGame(ladder: ladder, user: currentUser, type: ladder.type).then((Game game) {
+                  Navigator.of(context).pop();
+                  return game;
+                });
                 if(ladder.startDate.compareTo(DateTime.now()) < 0)
                   Navigator.push(context, MaterialPageRoute(builder: (context) => PlayPage(ladder: ladder)));
                 else {

@@ -10,7 +10,7 @@ pd.set_option('display.max_columns', None)
 cred = credentials.Certificate('trivia-game-d1e6e-firebase-adminsdk-f1czf-6bfce2b44e.json')
 firebase_admin.initialize_app(cred)
 db = firestore.client()
-csv_path = 'question_files/TriviaQuestions1-Kyle.csv'
+csv_path = 'question_files/TriviaQuestions_2020-04-24.csv'
 # Subclass QMainWindow to customise your application's main window
 class MainWindow(QMainWindow):
 

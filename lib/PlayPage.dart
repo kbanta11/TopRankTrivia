@@ -110,6 +110,56 @@ class PlayPageState extends State<PlayPage> {
                                   ),
                                 ],
                               )
+                          ) : game.streak == 50 ? Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Container(
+                                    alignment: Alignment.center,
+                                    child: InkWell(
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                                image: AssetImage('assets/images/StartGameBtn.png'),
+                                                fit: BoxFit.fill
+                                            )
+                                        ),
+                                        //alignment: Alignment.center,
+                                        child: Padding(
+                                          padding: EdgeInsets.all(15),
+                                          child: Text('Back to Ladder', style: TextStyle(fontSize: 24, color: Colors.white)),
+                                        ),
+                                      ),
+                                      onTap: () async {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return Center(child: CircularProgressIndicator());
+                                          }
+                                        );
+                                        await DBService().answerQuestion(null, game, null).then((_) {
+                                          Navigator.of(context).pop();
+                                        });
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => LadderPage(ladder)));
+                                      },
+                                    ),
+                                  ),
+                                  SimpleDialog(
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                    title: Center(child: Text('Maxed Out', style: TextStyle(fontSize: 24))),
+                                    children: <Widget>[
+                                      Padding(
+                                        padding: EdgeInsets.fromLTRB(15, 5, 15, 15),
+                                        child: Text('How do you know so much?\n\nYou\'ve beaten the last question and broken the game, and for that we gave you brilliant bonus!\n\nCan you do it again?',
+                                          style: TextStyle(fontSize: 18),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              )
                           ) : Expanded(
                               child: Column(
                                 children: <Widget>[

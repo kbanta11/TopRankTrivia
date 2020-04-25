@@ -316,28 +316,30 @@ class DBService {
       'last_question_time': DateTime.now(),
     });
 
-    DocumentReference questionRef = _db.collection('questions').document(question.id);
-    int timesAnswered = await questionRef.get().then((value) => value.data['times_answered']);
-    Map answerCounts = await questionRef.get().then((value) => value.data['answer_counts']);
-    if(timesAnswered == null) {
-      timesAnswered = 1;
-    } else {
-      timesAnswered = timesAnswered + 1;
-    }
-    if(ans != null) {
-      if(answerCounts == null) {
-        answerCounts = {ans.value: 1};
+    if(question != null) {
+      DocumentReference questionRef = _db.collection('questions').document(question.id);
+      int timesAnswered = await questionRef.get().then((value) => value.data['times_answered']);
+      Map answerCounts = await questionRef.get().then((value) => value.data['answer_counts']);
+      if(timesAnswered == null) {
+        timesAnswered = 1;
       } else {
-        int answerCnt = answerCounts[ans.value];
-        if(answerCnt == null) {
-          answerCnt = 1;
-        } else {
-          answerCnt = answerCnt + 1;
-        }
-        answerCounts[ans.value] = answerCnt;
+        timesAnswered = timesAnswered + 1;
       }
+      if(ans != null) {
+        if(answerCounts == null) {
+          answerCounts = {ans.value: 1};
+        } else {
+          int answerCnt = answerCounts[ans.value];
+          if(answerCnt == null) {
+            answerCnt = 1;
+          } else {
+            answerCnt = answerCnt + 1;
+          }
+          answerCounts[ans.value] = answerCnt;
+        }
+      }
+      batch.updateData(questionRef, {'times_answered': timesAnswered, 'answer_counts': answerCounts});
     }
-    batch.updateData(questionRef, {'times_answered': timesAnswered, 'answer_counts': answerCounts});
     await batch.commit();
     return;
   }
