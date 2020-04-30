@@ -1,0 +1,61 @@
+Category,Type,Difficulty,Question,Correct_Answer,Incorrect_Answer1,Incorrect_Answer2,Incorrect_Answer3,Verified
+Entertainment,Multiple Choice,Medium,"Which of these actors/actresses does not star in the TV show ""Community""?",Tina Fey,Donald Glover,Ken Jeong,Joel McHale,True
+Entertainment,Multiple Choice,Medium,"Which of the following is not a character on ""The Simpsons""?",Stan Marsh,Ned Flanders,Maggie Simpson,Milhouse Van Houten,True
+Entertainment,Multiple Choice,Medium,"The TV Show ""Law & Order"" was first aired in what year?",1990,1987,1994,1998,True
+Entertainment,Multiple Choice,Medium,"Which of these was not a character on the TV show ""Lost""?",Jason Light,Hugo Reyes,James Ford,Sayid Jarrah,True
+Entertainment,Multiple Choice,Medium,Which film won the Palme d'Or at the 2017 Cannes Film Festival?,The Square,Parasite,The Tree of Life,Moonlight,True
+Entertainment,Multiple Choice,Medium,"Which famous rock band was behind the chart-topping 1979 album ""The Wall""?",Pink Floyd,The Who,The Rolling Stones,Van Halen,True
+Entertainment,Multiple Choice,Medium,In which country was Arnold Schwarzenegger born?,Austria,Germany,Belarus,Romania,True
+Entertainment,Multiple Choice,Medium,"The movie Die Hard, starring Bruce Willis, is based on which of the following books?",Nothing Lasts Forever by Roderick Thorp,Savage Son by Jack Carr,First Blood by David Morrell,Cold Storage by David Koepp,True
+Entertainment,Multiple Choice,Medium,Which of these artists has not performed at the Super Bowl?,Rihanna,Beyonce,The Rolling Stones,U2,True
+Entertainment,Multiple Choice,Medium,In what year was Netflix founded?,1997,2004,2009,2006,True
+Sports,Multiple Choice,Medium,Which of these NFL teams did Brett Favre NOT play for during his career?,Buffalo Bills,Atlanta Falcons,Minnesota Vikings,New York Jets,True
+Sports,Multiple Choice,Medium,"As of the 2019 season, what is the record for longest field goal made in the NFL?",64 Yards,67 Yards,61 Yards,63 Yards,True
+Sports,Multiple Choice,Medium,"What is longest run in NFL history, achieved by Tony Dorsett and tied by Derrick Henry?",99 Yards,100 Yards,98 Yards,97 Yards,True
+Sports,Mutliple Choice,Medium,"Who was ""Mr. Irrelevant"" in the 2009 NFL Draft?",Ryan Succop,Chad Kelly,Mark Sanchez,Pat McAfee,True
+Sports,Multiple Choice,Medium,Who was the first overall pick in the 2003 NFL Draft?,Carson Palmer,Andre Johnson,Troy Polamalu,Byron Leftwich,True
+Sports,Multiple Choice,Medium,"As of the 2019 NFL Season, which player holds the record for most rushing yards in a single game at 296 yards?",Adrian Peterson,Derrick Henry,O.J. Simpson,Jamal Lewis,True
+Sports,Multiple Choice,Medium,Which NFL player has the most receiving yards in a single season (as of 2019)?,Calvin Johnson,Julio Jones,Jerry Rice,Antonio Brown,True
+Sports,Multiple Choice,Medium,Who was the MVP of Super Bowl XXXVII (37)?,Dexter Jackson,Rich Gannon,Brad Johnson,Mike Alstott,True
+Sports,Multiple Choice,Medium,Who is the oldest winning Super Bowl head coach?,Bill Belichick,Pete Carroll,Barry Switzer,Don Shula,True
+Sports,Multiple Choice,Medium,Who is the youngest winning Super Bowl head coach?,Mike Tomlin,Jon Gruden,John Madden,Don Shula,True
+Art,Multiple Choice,Medium,Which of the following pairs are NOT complementary colors?,Blue and Yellow,Yellow and Purple,Blue and Orange,Red and Green,True
+Art,Multiple Choice,Medium,When did the Abstract Expressionism art movement take place?,1940s-1950s,1910s-1920s,1890-1900s,1960s,True
+Art,Multiple Choice,Medium,With which artistic style is Salvador Dali most famously associated?,Surrealism,Impressionism,Post Impressionism,Expressionism,True
+Art,Multiple Choice,Medium,"In what city would you find Leonardo da Vinci's ""The Last Supper""?","Milan, Italy","Rome, Italy",Vatican City,"London, England",True
+Art,Multiple Choice,Medium,Who was the founder of Germany's Bauhaus art and design school?,Walter Gropius,Frank Lloyd Wright,Gunter Sachs,Josef Albers,True
+Art,Multiple Choice,Medium,"Which animal is often associated with ""peace"" in art?",Dove,Fish,Dog,Deer,True
+Art,Multiple Choice,Medium,In which century was Johannes Vermeer creating his works of art?,1600s,1500s,1700s,1800s,True
+Art,Multipled Choice,Medium,"Impressionism, as a style of art, draws its name from a work of which artist?",Claude Monet,Louis Leroy,Pierre-Auguste Renoir,Charles Gleyre,True
+Art,Multiple Choice,Medium,Cartoonist Jim Davis is most widely known for which comic strip?,Garfield,Peanuts,Dilbert,Calvin and Hobbes,True
+Art,Multiple Choice,Medium,Graffiti artist Banksy also directed which documentary film?,Exit Through the Gift Shop,Abstract: The Art of Design,Saving Banksy,The Art of the Steal,True
+History,Multiple Choice,Medium,"Which United States ""founding father"" did NOT sign the Declaration of Independence?",George Washington,Thomas Jefferson,Samuel Adams,Robert Morris,True
+History,Multiple Choice,Medium,In what year did the Boston Tea Party take place?,1773,1771,1775,1774,True
+History,Multiple Choice,Medium,"The Code of Hammurabi, one of the oldest systems of laws ever written down, were used to govern which ancient kingdom?",Babylon,Macedonia,Indus,Assyria,True
+History,Multiple Choice,Medium,Who was the first person to be elected as President of Russia?,Boris Yeltsin,Vladimir Putin,Dmitry Medvedev,Alexander Rutskoy,True
+History,Multiple Choice,Medium,How many countries were created after the dissolution of the Soviet Union?,15,11,18,9,True
+History,Multiple Choice,Medium,Which sport played a critical role in opening diplomatic talks with the People's Republic of China during the Cold War?,Ping Pong,Basketball,Soccer,Cricket,True
+History,Multiple Choice,Medium,When were rubber bands first invented?,1845,1890,1904,1897,True
+History,Multiple Choice,Medium,Who was the first President of the United States to be impeached?,Andrew Johnson,Bill Clinton,Donald Trump,Richard Nixon,True
+History,Multiple Choice,Medium,Who was the only US President to resign from the office of the Presidency?,Richard Nixon,Bill Clinton,Herbert Hoover,Andrew Johnson,True
+History,Multiple Choice,Medium,"Which speech given by President Lincoln begins with ""Four score and seven years ago...""?",Gettysburg Address,Second Inaugural Address,First Inaugural,Lyceum Address,True
+Science,Multiple Choice,Medium,"How far away, on average, is Earth from it's moon?","238,855 miles","198,920 miles","50,295 miles","114,870 miles",True
+Science,Multiple Choice,Medium,"A common neighborhood pest, what is a Procyon lotor?",Raccoon,Squirrel,Rat,Skunk,True
+Science,Multiple Choice,Medium,To what subfamily of species does the common dairy cow belong?,Bovinae,Cephalophinae,Caprinae,Alcelaphinae,True
+Science,Multiple Choice,Medium,On what scale are chili pepper spice or heat levels usually measured?,Scoville Scale,Spice Scale,Melvin Scale,Brumfeld Scale,True
+Science,Multiple Choice,Medium,What do koalas typically eat?,Eucalyptus Leaves,Grass,Banana Leaves,Mice,True
+Science,Multiple Choice,Medium,What is the boiling point of water in Celsius?,100°,212°,32°,0°,True
+Science,Multiple Choice,Medium,Rain storms are typically produced by which type of cloud?,Nimbus,Cirrus,Cumulus,Stratus,True
+Science,Multiple Choice,Medium,What is the study of fish called?,Ichthyology,Entomology,Agrostology,Ornithology,True
+Science,Multiple Choice,Medium,What is eremology?,The study of deserts,The study of the atmosphere,The study of birds,The study of hair,True
+Science,Multiple Choice,Medium,How many oxygen atoms are in 5 water molecules?,5,10,0,20,True
+Geography,Multiple Choice,Medium,What is the capital of the state of New York?,Albany,Buffalo,New York City,Manhattan,True
+Geography,Multiple Choice,Medium,"In what state will you find the cities of Laramie, Cody and Sheridan?",Wyoming,South Dakota,Arkansas,West Virginia,True
+Geography,Multiple Choice,Medium,"If you are visiting Carlsbad Caverns National Park, what state are you in?",New Mexico,California,Texas,Utah,True
+Geography,Multiple Choice,Medium,In what country will you find the massive landmark known as Uluru?,Australia,South Africa,Namibia,Indonesia,True
+Geography,Multiple Choice,Medium,What is the tallest mountain in Europe?,Mount Elbrus,Mount Denali,K2,Mont Blanc,True
+Geography,Multiple Choice,Medium,What was the name of Earth's former supercontinent before breaking up nearly 175 million years ago?,Pangaea,Cimmeria,Columbia,Maneria,True
+Geography,Multiple Choice,Medium,What is the capital of New Zealand?,Wellington,Auckland,Melbourne,Christchurch,True
+Geography,Multiple Choice,Medium,How many countries does the Principality of Andorra share a border with?,2,1,0,4,True
+Geography,Multiple Choice,Medium,In what country will you find the Nile River delta?,Egypt,Uganda,Congo,Sudan,True
+Geography,Multiple Choice,Medium,In which two countries is Mount Everest located?,China and Nepal,India and Pakistan,Iran and Pakistan,Bangladesh and Myanmar,True
