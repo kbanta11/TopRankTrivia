@@ -60,14 +60,18 @@ class LadderPage extends StatelessWidget {
                                       padding: EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 10),
                                       child: Container(
                                         width: MediaQuery.of(context).size.width - 20,
-                                        height: 50,
                                         decoration: BoxDecoration(
                                           image: DecorationImage(
                                             image: AssetImage('assets/images/EndDateBackground.png'),
                                             fit: BoxFit.fill
                                           )
                                         ),
-                                        child: Center(child: Text('${ladder.endDate.compareTo(DateTime.now()) < 0 ? 'Ended:' : 'Ends:'} ${Helper().dateToString(ladder.endDate)}!', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18, fontFamily: 'Sans'),),),
+                                        child: Center(
+                                          child: Container(
+                                            padding: EdgeInsets.fromLTRB(5, 5, 5, 10),
+                                              child: Text('${ladder.endDate.compareTo(DateTime.now()) < 0 ? 'Ended:' : 'Ends:'} ${Helper().dateToString(ladder.endDate)}!', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18, fontFamily: 'Sans'), textAlign: TextAlign.center)
+                                          ),
+                                        ),
                                       ),
                                     ),
                                     Row(
@@ -414,7 +418,7 @@ class LadderPage extends StatelessWidget {
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: <Widget>[
-                                        Text('Congrats!', style: TextStyle(fontSize: 16, color: Colors.white),),
+                                        Text('Congrats', style: TextStyle(fontSize: 16, color: Colors.white),),
                                         Text('${gamesList != null && gamesList.length > 0 ? ' ${User().getDisplayName(nm: gamesList[0].userDisplayname)}!' : ''}', style: TextStyle(fontSize: 16, color: Colors.white),)
                                       ],
                                     ) : game == null ? Container(

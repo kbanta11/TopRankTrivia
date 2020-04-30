@@ -456,7 +456,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                           padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
                                           child: Container(
                                             width: MediaQuery.of(context).size.width,
-                                            height: 120,
+                                            //height: 120,
                                             decoration: BoxDecoration(
                                               image: DecorationImage(
                                                 image: AssetImage('assets/images/LadderTilebg.png'),
@@ -465,7 +465,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                             ),
                                             child: InkWell(
                                               child: Padding(
-                                                padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                                                padding: EdgeInsets.fromLTRB(10, 10, 10, 20),
                                                 child: Row(
                                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                   children: <Widget>[
