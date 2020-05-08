@@ -39,8 +39,12 @@ class MyApp extends StatelessWidget {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     FirebaseAnalytics analytics = FirebaseAnalytics();
     if (Platform.isIOS) {
+      _fcm.requestNotificationPermissions(const IosNotificationSettings(sound: true, badge: true, alert: true));
       iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
         // save the token  OR subscribe to a topic here
+        _fcm.getToken().then((token) {
+          print(token);
+        });
       });
       _fcm.requestNotificationPermissions(IosNotificationSettings());
     }
