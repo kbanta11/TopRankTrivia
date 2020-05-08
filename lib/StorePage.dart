@@ -258,7 +258,7 @@ class StorePage extends StatelessWidget {
                                                   RewardedVideoAd.instance.show();
                                                 }
                                               };
-                                              await RewardedVideoAd.instance.load(adUnitId: 'ca-app-pub-5887055143640982/1245405277' ?? RewardedVideoAd.testAdUnitId, targetingInfo: MobileAdTargetingInfo(testDevices: ['2A964E13F4310B0C3E0B13C89E35FD98','2EAF3CA98C317AA4482F535CA1094A23', 'F358A854E8C08E90BDD900D8B4B97846']));
+                                              await RewardedVideoAd.instance.load(adUnitId: 'ca-app-pub-5887055143640982/1245405277' ?? RewardedVideoAd.testAdUnitId, targetingInfo: MobileAdTargetingInfo(testDevices: ['2A964E13F4310B0C3E0B13C89E35FD98','2EAF3CA98C317AA4482F535CA1094A23', 'F358A854E8C08E90BDD900D8B4B97846', '75199624E49A48A7E1B223CA92726059']));
                                             },
                                           ),
                                         ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_admob/firebase_admob.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -410,7 +412,7 @@ class LadderPage extends StatelessWidget {
                                         ],
                                       )
                                   ),
-                                  SizedBox(width: 8),
+                                  SizedBox(width: 4),
                                   Container(
                                     width: 120,
                                     alignment: Alignment.centerRight,
@@ -493,7 +495,40 @@ class LadderPage extends StatelessWidget {
                                             return Container(height: 40);
                                           if(!game.isAlive && timeSinceLast.compareTo(ladder.respawnTime) < 0) {
                                             Duration timeLeft = Duration(seconds: ladder.respawnTime.inSeconds - timeSinceLast.inSeconds);
-                                            return Text('${timeLeft.inHours > 0 ? '${timeLeft.inHours}:' : ''}${timeLeft.inMinutes.remainder(60).toString().padLeft(2, '0')}:${timeLeft.inSeconds.remainder(60).toString().padLeft(2, '0')}', style: TextStyle(fontSize: 24, color: Colors.white),);
+                                            return Row(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: <Widget>[
+                                                Text('${timeLeft.inHours > 0 ? '${timeLeft.inHours}:' : ''}${timeLeft.inMinutes.remainder(60).toString().padLeft(2, '0')}:${timeLeft.inSeconds.remainder(60).toString().padLeft(2, '0')}', style: TextStyle(fontSize: 24, color: Colors.white),),
+                                                IconButton(
+                                                  icon: Icon(Icons.ondemand_video, color: Colors.white,),
+                                                  padding: EdgeInsets.all(0),
+                                                  onPressed:  () async {
+                                                    showDialog(
+                                                        context: context,
+                                                        builder: (BuildContext context) {
+                                                          return Center(
+                                                            child: CircularProgressIndicator(),
+                                                          );
+                                                        }
+                                                    );
+                                                    RewardedVideoAd.instance.listener = (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}) {
+                                                      if(event == RewardedVideoAdEvent.rewarded) {
+                                                        print('skip waiting, go to playing game');
+                                                        Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                                          return PlayPage(ladder: ladder);
+                                                        }));
+                                                      }
+                                                      if(event == RewardedVideoAdEvent.loaded) {
+                                                        Navigator.of(context).pop();
+                                                        RewardedVideoAd.instance.show();
+                                                      }
+                                                    };
+                                                    await RewardedVideoAd.instance.load(adUnitId: 'ca-app-pub-5887055143640982/8644124935' ?? RewardedVideoAd.testAdUnitId, targetingInfo: MobileAdTargetingInfo(testDevices: ['2A964E13F4310B0C3E0B13C89E35FD98','2EAF3CA98C317AA4482F535CA1094A23', 'F358A854E8C08E90BDD900D8B4B97846', '75199624E49A48A7E1B223CA92726059']));
+                                                  },
+                                                ),
+                                              ],
+                                            );
                                           }
                                           if(ladder.startDate.compareTo(DateTime.now()) >= 0){
                                             print(DateTime.now().compareTo(ladder.startDate));

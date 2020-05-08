@@ -13,6 +13,7 @@ class User {
   int laddersPlaced;
   int laddersWon;
   bool isAdmin;
+  Map recentQuestions;
 
   User({
     this.userId,
@@ -25,6 +26,7 @@ class User {
     this.laddersPlaced,
     this.laddersWon,
     this.isAdmin,
+    this.recentQuestions,
   });
 
   factory User.fromFirestore(DocumentSnapshot snap) {
@@ -43,6 +45,7 @@ class User {
       laddersPlaced: data['laddersPlaced'],
       laddersWon: data['laddersWon'],
       isAdmin: data['is_admin'] ?? false,
+      recentQuestions: data['recent_questions'] ?? null,
     );
   }
 
@@ -59,6 +62,36 @@ class User {
       });
     }
     return name;
+  }
+}
+
+class Message {
+  String messageId;
+  String ladderId;
+  String subject;
+  String message;
+  DateTime ladderEndDate;
+  bool isRead;
+
+  Message({
+    this.messageId,
+    this.ladderId,
+    this.subject,
+    this.message,
+    this.ladderEndDate,
+    this.isRead
+  });
+
+  factory Message.fromFirestore(DocumentSnapshot snap) {
+    print('${snap.data['ladder_end_date'].toDate()}');
+    return Message(
+      messageId: snap.documentID,
+      ladderId: snap.data['ladder_id'].toString(),
+      ladderEndDate: snap.data['ladder_end_date'].toDate(),
+      subject: snap.data['message_subject'].toString(),
+      message: snap.data['message'].toString(),
+      isRead: snap.data['is_read'],
+    );
   }
 }
 
@@ -117,6 +150,7 @@ class Game {
   int totalScore;
   int livesRemaining;
   int streak;
+  int highStreak;
   DateTime entryDate;
   DateTime lastQuestionDate;
   bool isAlive;
@@ -132,6 +166,7 @@ class Game {
     this.lastQuestionDate,
     this.isAlive,
     this.streak,
+    this.highStreak,
   });
 
   factory Game.fromFirestore(DocumentSnapshot snap) {
@@ -149,6 +184,7 @@ class Game {
       lastQuestionDate: lastQuestionTime == null ? null : lastQuestionTime.toDate(),
       isAlive: data['is_alive'],
       streak: data['streak'],
+      highStreak: data['high_streak'] ?? 0,
     );
   }
 
@@ -229,6 +265,12 @@ class Helper {
   String dateToString(DateTime date) {
     DateTime localDate = date.toLocal();
     DateFormat format = DateFormat('EEEE, MMMM d, y h:mm aa');
+    return '${format.format(localDate)}';
+  }
+
+  String dateTimeToStringShort(DateTime date) {
+    DateTime localDate = date.toLocal();
+    DateFormat format = DateFormat('MM/dd/yyyy h:mm aa');
     return '${format.format(localDate)}';
   }
 

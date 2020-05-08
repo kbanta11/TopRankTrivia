@@ -19,6 +19,8 @@ import 'AddLadder.dart';
 import 'AdminPage.dart';
 import 'LadderPage.dart';
 import 'StorePage.dart';
+import 'HowToDialog.dart';
+import 'MessagesDialog.dart';
 import 'models.dart';
 
 const String AD_MOB_APP_ID = 'ca-app-pub-5887055143640982~1017841422';
@@ -664,38 +666,83 @@ class TopMenu extends StatelessWidget {
   @override
   build(BuildContext context) {
     User currentUser = Provider.of<User>(context);
-    return PopupMenuButton(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(15, 10, 10, 10),
-        child: Image.asset('assets/images/menu-btn.png', height: 15, width: 15,),
-      ),
-      itemBuilder: (context) {
-        List<PopupMenuItem> items = List<PopupMenuItem>();
-        items.add(PopupMenuItem(
-          child: Text('Logout'),
-          value: 'logout',
-        ));
-        items.add(PopupMenuItem(
-          child: Text('Ladders'),
-          value: 'ladders',
-        ));
-        if(currentUser.isAdmin)
-          items.add(PopupMenuItem(
-            child: Text('Admin'),
-            value: 'admin',
-          ));
-        return items;
-      },
-      onSelected: (value) {
-        if(value == 'logout') {
-          DBService().logout();
-          Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
-        }
-        if(value == 'ladders')
-          Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage()));
-        if(value == 'admin')
-          Navigator.push(context, MaterialPageRoute(builder: (context) => AdminPage()));
-      },
+
+    return StreamProvider<List<Message>>.value(
+        value: DBService().streamUserMessages(currentUser),
+        child: Consumer<List<Message>>(
+          builder: (context, messageList, _) {
+            return PopupMenuButton(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(15, 10, 10, 10),
+                child: Stack(
+                  children: <Widget>[
+                    Image.asset('assets/images/menu-btn.png', height: 50, width: 50,),
+                    messageList != null && messageList.where((msg) => !msg.isRead).length > 0 ? Align(
+                      alignment: Alignment.topRight,
+                      child: FaIcon(FontAwesomeIcons.solidComment, color: Colors.amberAccent, size: 20,),
+                    ) : Container(),
+                  ],
+                ),
+              ),
+              itemBuilder: (context) {
+                List<PopupMenuItem> items = List<PopupMenuItem>();
+
+                items.add(PopupMenuItem(
+                  child: Text('Ladders'),
+                  value: 'ladders',
+                ));
+                items.add(PopupMenuItem(
+                    child: Row(
+                      children: <Widget>[
+                        Text('Messages'),
+                        SizedBox(width: 10,),
+                        messageList != null && messageList.where((msg) => !msg.isRead).length > 0 ? FaIcon(FontAwesomeIcons.solidComment, color: Colors.amberAccent, size: 20) : Container(),
+                      ],
+                    ),
+                    value: 'messages'
+                ));
+                items.add(PopupMenuItem(
+                  child: Text('How To Play'),
+                  value: 'howto',
+                ));
+                if(currentUser.isAdmin)
+                  items.add(PopupMenuItem(
+                    child: Text('Admin'),
+                    value: 'admin',
+                  ));
+                items.add(PopupMenuItem(
+                  child: Text('Logout'),
+                  value: 'logout',
+                ));
+                return items;
+              },
+              onSelected: (value) {
+                if(value == 'logout') {
+                  DBService().logout();
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+                }
+                if(value == 'ladders')
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage()));
+                if(value == 'admin')
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => AdminPage()));
+                if(value == 'howto')
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return HowToDialog();
+                      }
+                  );
+                if(value == 'messages')
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return MessagesDialog(currentUser);
+                      }
+                  );
+              },
+            );
+          },
+        ),
     );
   }
 }

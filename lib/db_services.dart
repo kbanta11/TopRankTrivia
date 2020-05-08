@@ -105,6 +105,20 @@ class DBService {
     return _db.collection('users').document(user.uid).snapshots().map((snap) => User.fromFirestore(snap));
   }
 
+  Stream<List<Message>> streamUserMessages(User user) {
+    return _db.collection('users').document(user.userId).collection('messages').snapshots().map((QuerySnapshot querySnap) {
+      print('QuerySnapshot: $querySnap/${querySnap.documents.length}');
+      return querySnap.documents.map((DocumentSnapshot docSnap) => Message.fromFirestore(docSnap)).toList();
+    });
+  }
+
+  markMessageRead(Message message, User user, {bool value}) async {
+    DocumentReference messageRef = _db.collection('users').document(user.userId).collection('messages').document(message.messageId);
+    await _db.runTransaction((t) {
+      return t.update(messageRef, {'is_read': value != null ? value : !message.isRead});
+    });
+  }
+
   Stream<List<Ladder>> streamLadders({String filter, String userId}) {
     Query query = _db.collection('ladders').where('end_date', isGreaterThanOrEqualTo: DateTime.now());
     if(filter == 'Upcoming') {
@@ -137,10 +151,33 @@ class DBService {
     return _db.collection('games').where('ladder_id', isEqualTo: ladderId).where('user_id', isEqualTo: userId).snapshots().map((snap) => snap.documents.map((doc) => Game.fromFirestore(doc)).first);
   }
 
-  Future<Question> getQuestion() async {
+  Future<Question> getQuestion(User user) async {
     List<Question> questionList = await _db.collection('questions').where('is_verified', isEqualTo: true).getDocuments().then((QuerySnapshot querySnap) => querySnap.documents.map((doc) => Question.fromFirestore(doc)).toList());
+    List<String> recentQuestionIds = user.recentQuestions != null ? user.recentQuestions.keys.toList() : null;
+    if(recentQuestionIds != null) {
+      questionList = questionList.where((Question q) => !recentQuestionIds.contains(q.id)).toList();
+      print('Removing following question ids: $recentQuestionIds');
+    }
     int randomNum = Random().nextInt(questionList.length);
-    return questionList[randomNum];
+    Question newQuestion = questionList[randomNum];
+    if(user.recentQuestions == null) {
+      user.recentQuestions = {newQuestion.id: 100};
+    } else {
+      if(user.recentQuestions.length >= 100) {
+        user.recentQuestions.removeWhere((k, v) => v <= 1);
+        user.recentQuestions = user.recentQuestions.map((k, v,) => MapEntry(k, v - 1));
+        user.recentQuestions.addAll({newQuestion.id: 100});
+      } else {
+        user.recentQuestions = user.recentQuestions.map((k, v) => MapEntry(k, v - 1));
+        user.recentQuestions.addAll({newQuestion.id: 100});
+      }
+    }
+    print('User recent questions: ${user.recentQuestions}');
+    await _db.runTransaction((transaction) async {
+      DocumentReference userRef = _db.collection('users').document(user.userId);
+      transaction.update(userRef, {'recent_questions': user.recentQuestions});
+    });
+    return newQuestion;
   }
 
   Future<Ladder> createNewLadder({String createdBy, String title, String prize, DateTime startDate, DateTime endDate, String type, int entryFee, int numLives, int respawnTime}) async {
@@ -170,7 +207,7 @@ class DBService {
     DateTime tomorrowEnd = DateTime(today.add(Duration(days: 2)).year, today.add(Duration(days: 2)).month, today.add(Duration(days: 2)).day);
     //Add daily ladders -
     laddersToAdd.add(Ladder(startDate: tomorrowStart, endDate: tomorrowEnd, entryFee: 100, type: 'coins', numLives: 25, respawnTime: Duration(minutes: 0), title: 'Daily 100 (Instant Respawn)'));
-    laddersToAdd.add(Ladder(startDate: tomorrowStart, endDate: tomorrowEnd, entryFee: 100, type: 'coins', numLives: -1, respawnTime: Duration(minutes: 0), title: 'Daily 100 (Unlimited Lives)'));
+    laddersToAdd.add(Ladder(startDate: tomorrowStart, endDate: tomorrowEnd, entryFee: 100, type: 'coins', numLives: -1, respawnTime: Duration(minutes: 1), title: 'Daily 100 (Unlimited Lives)'));
     laddersToAdd.add(Ladder(startDate: tomorrowStart, endDate: tomorrowEnd, entryFee: 500, type: 'coins', numLives: 25, respawnTime: Duration(minutes: 0), title: 'Daily 500 (Instant Respawn)'));
     laddersToAdd.add(Ladder(startDate: tomorrowStart, endDate: tomorrowEnd, entryFee: 500, type: 'coins', numLives: -1, respawnTime: Duration(minutes: 2), title: 'Daily 500 (Unlimited Lives)'));
     laddersToAdd.add(Ladder(startDate: tomorrowStart, endDate: tomorrowEnd, entryFee: 1000, type: 'coins', numLives: -1, respawnTime: Duration(minutes: 2), title: 'Daily 1000 (Unlimited Lives)'));
@@ -219,6 +256,7 @@ class DBService {
         'user_displayname': user.displayName,
         'total_score': 0,
         'streak': 0,
+        'high_streak': 0,
         'max_lives': ladder.numLives,
         'lives_remaining': ladder.numLives,
         'is_alive': true,
@@ -266,18 +304,24 @@ class DBService {
     int streak = await gameRef.get().then((snap) => snap.data['streak']);
     int livesLeft = await gameRef.get().then((snap) => snap.data['lives_remaining']);
     int newScore = currentScore;
+    int highStreak = game.highStreak;
     bool isAlive = true;
     if(ans != null && ans.isCcorrect){
       if(streak == null)
         streak = 1;
       else
         streak = streak + 1;
+
+      //check if streak is a new high streak
+      if(streak > game.highStreak)
+        highStreak = streak;
+
       //update score with new score for question
       int questionScore;
       int multiplier = 1;
       if(streak < 5) {
         multiplier = 1;
-      } else if (streak ==50) {
+      } else if (streak == 50) {
         multiplier = 100;
       } else if (streak.remainder(5) == 0) {
         multiplier = streak;
@@ -311,6 +355,7 @@ class DBService {
     batch.updateData(gameRef, {
       'total_score': newScore,
       'streak': streak,
+      'high_streak': highStreak,
       'is_alive': isAlive,
       'lives_remaining': livesLeft,
       'last_question_time': DateTime.now(),

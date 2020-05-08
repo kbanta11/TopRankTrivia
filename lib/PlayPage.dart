@@ -39,6 +39,7 @@ class PlayPageState extends State<PlayPage> {
   @override
   build(BuildContext context) {
     FirebaseUser currentUser = Provider.of<FirebaseUser>(context);
+    User user = Provider.of<User>(context);
     return StreamProvider<Game>(
       create: (context) =>  DBService().streamGame(ladder.id, currentUser.uid).handleError((err) => print(err)),
       child: Consumer<Game>(
@@ -100,7 +101,7 @@ class PlayPageState extends State<PlayPage> {
                                               );
                                             }
                                           );
-                                          await gp.getQuestion(game).then((_) {
+                                          await gp.getQuestion(game, user).then((_) {
                                             Navigator.of(context).pop();
                                           });
                                           gettingQuestion = false;
@@ -219,7 +220,7 @@ class PlayPageState extends State<PlayPage> {
                                                         );
                                                       }
                                                     );
-                                                    await gp.getQuestion(game).then((_) {
+                                                    await gp.getQuestion(game, user).then((_) {
                                                       Navigator.of(context).pop();
                                                     });
                                                     gettingQuestion = false;
@@ -372,7 +373,7 @@ class PlayPageState extends State<PlayPage> {
                                                 ),
                                                 onTap: () {
                                                   if(gp.hasReroll && !gp.isAnswered)
-                                                    gp.useReroll(game);
+                                                    gp.useReroll(game, user);
                                                 },
                                               )
                                             ],
@@ -412,11 +413,11 @@ class GameProvider extends ChangeNotifier {
   bool showStats = false;
   bool hasReroll = true;
 
-  Future<void> getQuestion(Game game) async {
+  Future<void> getQuestion(Game game, User user) async {
     showStats = false;
     inactiveAnswers = null;
     hasStarted = true;
-    currentQuestion = await DBService().getQuestion();
+    currentQuestion = await DBService().getQuestion(user);
     chosenAnswer = null;
     timeLeft = startTime;
     isAnswered = false;
@@ -456,9 +457,9 @@ class GameProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void useReroll(Game game) {
+  void useReroll(Game game, User user) {
     hasReroll = false;
-    getQuestion(game);
+    getQuestion(game, user);
     notifyListeners();
   }
 

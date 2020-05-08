@@ -42,5 +42,36 @@ module.exports = {
       this.user = userId;
       this.totalScore = score;
     }
+  },
+  UserOld: class {
+    constructor(userId, coins, bars, wins, placed) {
+      this.userId = userId;
+      this.coins = coins;
+      this.bars = bars;
+      this.wins = wins;
+      this.placed = placed;
+      this.messages = {};
+    }
+  },
+  User: class {
+    constructor(userId) {
+      this.userId = userId;
+    }
+  },
+  Ladder: class {
+    constructor(ladderId, endDate, entryFee, type, title) {
+      this.ladderId = ladderId;
+      this.endDate = endDate;
+      this.entryFee = entryFee;
+      this.type = type;
+      this.title = title;
+      this.games = [];
+    }
+  },
+  Message: class {
+    constructor(ladder, game) {
+      this.ladder = ladder;
+      this.game = game;
+    }
   }
 }
