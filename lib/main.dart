@@ -10,6 +10,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:trivia_game/AdminPage.dart';
+import 'package:trivia_game/Blitz.dart';
 import 'package:trivia_game/db_services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -19,6 +20,7 @@ import 'AddLadder.dart';
 import 'AdminPage.dart';
 import 'LadderPage.dart';
 import 'StorePage.dart';
+import 'HeadToHead.dart';
 import 'HowToDialog.dart';
 import 'MessagesDialog.dart';
 import 'models.dart';
@@ -105,18 +107,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -130,8 +120,6 @@ class _MyHomePageState extends State<MyHomePage> {
             onWillPop: () => Future.value(false),
             child: Scaffold(
               body: Center(
-                // Center is a layout widget. It takes a single child and positions it
-                // in the middle of the parent.
                 child: Container(
                   child: Column(
                     children: <Widget>[
@@ -353,57 +341,11 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.fromLTRB(8, 15, 5, 0),
+                        padding: EdgeInsets.fromLTRB(8, 5, 8, 5),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            FlatButton(
-                              color: Colors.cyan,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: <Widget>[
-                                  Container(
-                                    height: 25,
-                                    width: 25,
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        image: AssetImage('assets/images/LadderIcon-White.png')
-                                      )
-                                    ),
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text('ladders', style: TextStyle(fontSize: 22, color: Colors.white)),
-                                ],
-                              ),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25))),
-                              onPressed: () {
-
-                              },
-                            ),
-                            OutlineButton(
-                              color: Colors.cyan,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25))),
-                              borderSide: BorderSide(color: Colors.cyan, width: 2),
-                              child: Row(
-                                children: <Widget>[
-                                  Container(
-                                    height: 25,
-                                    width: 25,
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        image: AssetImage('assets/images/ShoppingCart-Blue.png')
-                                      )
-                                    ),
-                                  ),
-                                  SizedBox(width: 5,),
-                                  Text('store', style: TextStyle(fontSize: 22, color: Colors.cyan))
-                                ],
-                              ),
-                              onPressed: () {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => StorePage()));
-                              },
-                            ),
                             DropdownButtonHideUnderline(
                                 child: Container(
                                   height: 35,
@@ -603,7 +545,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),
                             ),
                           )
-                      )
+                      ),
+                      BottomNavBar(context: context, selected: 'ladders',)
                     ],
                   ),
                 ),
@@ -627,40 +570,105 @@ class BottomNavBar extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
-        FlatButton(
-          color: selected == 'ladders' ? Colors.deepOrange[500].withOpacity(0.6) : Colors.white,
-          child: Row(
-            children: <Widget>[
-              Container(
-                height: 28,
-                width: 28,
-                decoration: BoxDecoration(
-                  image: DecorationImage(image: AssetImage('assets/images/ladder.png'))
-                ),
-              ),
-              SizedBox(width: 7),
-              Text('Ladders', style: TextStyle(fontSize: 20),)
-            ],
-          ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage()));
-          },
+        //Ladders
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.fromLTRB(2, 5, 2, 5),
+            color: selected == 'ladders' ? Colors.cyan : Colors.transparent,
+            child: Center(
+                child: FlatButton(
+                  color: Colors.transparent,
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        height: 28,
+                        width: 28,
+                        decoration: BoxDecoration(
+                            image: DecorationImage(image: AssetImage('assets/images/LadderIcon-${selected == 'ladders' ? 'White' : 'Blue'}.png'))
+                        ),
+                      ),
+                      SizedBox(width: 7),
+                      Text('Ladders', style: TextStyle(fontSize: 18, color: selected == 'ladders' ? Colors.white : Colors.cyan),)
+                    ],
+                  ),
+                  //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage()));
+                  },
+                )
+            ),
+          )
         ),
-        FlatButton(
-          child: Row(
-            children: <Widget>[
-              Icon(Icons.store, size: 30,),
-              SizedBox(width: 7),
-              Text('Store', style: TextStyle(fontSize: 20))
-            ],
+        //1v1
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.fromLTRB(2, 5, 2, 5),
+            color: selected == 'head' ? Colors.cyan : Colors.transparent,
+            child: Center(
+              child: FlatButton(
+                child: Column(
+                    children: <Widget>[
+                      Icon(Icons.people, size: 30, color: selected == 'head' ? Colors.white : Colors.cyan,),
+                      Text('1 v 1', style: TextStyle(fontSize: 18, color: selected == 'head' ? Colors.white : Colors.cyan))
+                    ]
+                ),
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => HeadToHeadPage()));
+                },
+              ),
+            )
+          )
+        ),
+        //Blitz
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.fromLTRB(2, 5, 2, 5),
+            color: selected == 'blitz' ? Colors.cyan : Colors.transparent,
+            child: Center(
+                child: FlatButton(
+                  child: Column(
+                    children: <Widget>[
+                      //Icon(Icons.offline_bolt),
+                      FaIcon(FontAwesomeIcons.bolt, color: selected == 'blitz' ? Colors.white : Colors.cyan,),
+                      Text('Blitz', style: TextStyle(fontSize: 18, color: selected == 'blitz' ? Colors.white : Colors.cyan))
+                    ],
+                  ),
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => TriviaBlitzPage()));
+                  },
+                )
+            ),
+          )
+        ),
+        //Store
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.fromLTRB(2, 5, 2, 5),
+            color: selected == 'store' ? Colors.cyan : Colors.transparent,
+            child: Center(
+                child: FlatButton(
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        height: 28,
+                        width: 28,
+                        decoration: BoxDecoration(
+                            image: DecorationImage(image: AssetImage('assets/images/ShoppingCart-${selected == 'store' ? 'White': 'Blue'}.png'))
+                        ),
+                      ),
+                      SizedBox(width: 7),
+                      Text('Store', style: TextStyle(fontSize: 18, color: selected == 'store' ? Colors.white : Colors.cyan))
+                    ],
+                  ),
+                  //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                  color: Colors.transparent,
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => StorePage()));
+                  },
+                )
+            )
           ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
-          color: selected == 'store' ? Colors.deepOrange[500].withOpacity(0.6) : Colors.white,
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => StorePage()));
-          },
-        )
+        ),
       ],
     );
   }
@@ -671,7 +679,7 @@ class TopMenu extends StatelessWidget {
   build(BuildContext context) {
     User currentUser = Provider.of<User>(context);
 
-    return StreamProvider<List<Message>>.value(
+    return currentUser == null ? Container() :StreamProvider<List<Message>>.value(
         value: DBService().streamUserMessages(currentUser),
         child: Consumer<List<Message>>(
           builder: (context, messageList, _) {
@@ -709,6 +717,10 @@ class TopMenu extends StatelessWidget {
                   child: Text('How To Play'),
                   value: 'howto',
                 ));
+                items.add(PopupMenuItem(
+                  child: Text('Head to Head'),
+                  value: 'head',
+                ));
                 if(currentUser.isAdmin)
                   items.add(PopupMenuItem(
                     child: Text('Admin'),
@@ -729,6 +741,8 @@ class TopMenu extends StatelessWidget {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage()));
                 if(value == 'admin')
                   Navigator.push(context, MaterialPageRoute(builder: (context) => AdminPage()));
+                if(value == 'head')
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => HeadToHeadPage()));
                 if(value == 'howto')
                   showDialog(
                       context: context,

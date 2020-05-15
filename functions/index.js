@@ -226,7 +226,7 @@ exports.processCompletedLadders = functions.pubsub.schedule('15 * * * *').onRun(
 					}
 					batch.set(messageRef, {
 						'ladder_id': message.ladder.ladderId,
-						'datesent': Date().getTime(),
+						'datesent': admin.firestore.Timestamp.now(),
 						'ladder_title': message.ladder.title,
 						'ladder_end_date': message.ladder.endDate,
 						'message_subject': typeof message.game.rank === 'undefined' ? 'Better Luck Next Time' : 'Congratulations!',

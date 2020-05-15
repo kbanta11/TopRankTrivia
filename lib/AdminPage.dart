@@ -108,7 +108,7 @@ class VerifyQuestionDialog extends StatelessWidget {
     List<Question> unverifiedQuestion = Provider.of<List<Question>>(context);
     unverifiedQuestion = unverifiedQuestion.where((element) => element.isVerified != true).toList();
     Question topQuestion = unverifiedQuestion != null ? unverifiedQuestion.first : null;
-    TextEditingController correctAnswerController = TextEditingController(text: '${topQuestion.answers.where((ans) => ans.isCcorrect).first.value}');
+    TextEditingController correctAnswerController = TextEditingController(text: '${topQuestion.answers.where((ans) => ans.isCorrect).first.value}');
     TextEditingController questionController = TextEditingController(text: '${topQuestion.question}');
     TextEditingController answer1;
     TextEditingController answer2;
@@ -137,13 +137,13 @@ class VerifyQuestionDialog extends StatelessWidget {
           controller: correctAnswerController,
           style: TextStyle(fontSize: 16, fontFamily: 'Sans'),
           onChanged: (val) {
-            topQuestion.answers.where((element) => element.isCcorrect).first.value = val;
+            topQuestion.answers.where((element) => element.isCorrect).first.value = val;
           },
         ),
         SizedBox(height: 10),
         Text('Other Options:', style: TextStyle(fontSize: 16, fontFamily: 'Sans'),),
         Column(
-          children: topQuestion.answers.where((ans) => !ans.isCcorrect).map((answer) {
+          children: topQuestion.answers.where((ans) => !ans.isCorrect).map((answer) {
             TextEditingController _controller = TextEditingController(text: answer.value);
             if(answer1 == null)
               answer1 = _controller;

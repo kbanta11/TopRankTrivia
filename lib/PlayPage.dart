@@ -10,8 +10,6 @@ import 'LoginPage.dart';
 import 'models.dart';
 import 'db_services.dart';
 
-//const String AD_MOB_TEST_DEVICE;
-
 class PlayPage extends StatefulWidget {
   Ladder ladder;
 
@@ -206,10 +204,10 @@ class PlayPageState extends State<PlayPage> {
                                             ),
                                             child: FlatButton(
                                               //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25))),
-                                              child: Text('${gp.chosenAnswer != null && gp.chosenAnswer.isCcorrect ? 'Next Question!' : 'Back to Ladder'}', style: TextStyle(fontSize: 24, color: Colors.white),),
+                                              child: Text('${gp.chosenAnswer != null && gp.chosenAnswer.isCorrect ? 'Next Question!' : 'Back to Ladder'}', style: TextStyle(fontSize: 24, color: Colors.white),),
                                               color: Colors.transparent,
                                               onPressed: () async {
-                                                if(gp.chosenAnswer != null && gp.chosenAnswer.isCcorrect) {
+                                                if(gp.chosenAnswer != null && gp.chosenAnswer.isCorrect) {
                                                   if(!gettingQuestion){
                                                     gettingQuestion = true;
                                                     showDialog(
@@ -260,7 +258,7 @@ class PlayPageState extends State<PlayPage> {
                                                 width: MediaQuery.of(context).size.width - 30,
                                                 decoration: BoxDecoration(
                                                     image: DecorationImage(
-                                                        image: AssetImage(gp.inactiveAnswers != null && gp.inactiveAnswers.contains(answer.value) ? 'assets/images/AnswerBar-Gray.png' : gp.isAnswered != null && !gp.isAnswered ? 'assets/images/AnswerBar.png' : answer.isCcorrect ? 'assets/images/RightAnswer.png' : gp.chosenAnswer != null && gp.chosenAnswer == answer ? 'assets/images/WrongAnswer.png' : 'assets/images/AnswerBar.png'),
+                                                        image: AssetImage(gp.inactiveAnswers != null && gp.inactiveAnswers.contains(answer.value) ? 'assets/images/AnswerBar-Gray.png' : gp.isAnswered != null && !gp.isAnswered ? 'assets/images/AnswerBar.png' : answer.isCorrect ? 'assets/images/RightAnswer.png' : gp.chosenAnswer != null && gp.chosenAnswer == answer ? 'assets/images/WrongAnswer.png' : 'assets/images/AnswerBar.png'),
                                                         fit: BoxFit.fill
                                                     )
                                                 ),
@@ -278,7 +276,7 @@ class PlayPageState extends State<PlayPage> {
                                                                 style: TextStyle(
                                                                   fontFamily: 'Sans',
                                                                   fontSize: 16,
-                                                                  color: gp.isAnswered != null && gp.isAnswered && (answer.isCcorrect || gp.chosenAnswer == answer) ? Colors.white : Colors.black,
+                                                                  color: gp.isAnswered != null && gp.isAnswered && (answer.isCorrect || gp.chosenAnswer == answer) ? Colors.white : Colors.black,
                                                                 )
                                                             ),
                                                           ),
@@ -437,7 +435,7 @@ class GameProvider extends ChangeNotifier {
   }
 
   void answerQuestion (Answer answer, Game game, Question question) {
-    print('${answer != null && answer.isCcorrect ? 'Correct!' : 'Incorrect'}: ${answer != null ? answer.value : ''}');
+    print('${answer != null && answer.isCorrect ? 'Correct!' : 'Incorrect'}: ${answer != null ? answer.value : ''}');
     chosenAnswer = answer;
     isAnswered = true;
     if(questionTimer != null)
@@ -450,7 +448,7 @@ class GameProvider extends ChangeNotifier {
 
   void use5050() {
     has5050 = false;
-    List<Answer> incorrectAnswers = currentQuestion.answers.where((element) => !element.isCcorrect).toList();
+    List<Answer> incorrectAnswers = currentQuestion.answers.where((element) => !element.isCorrect).toList();
     incorrectAnswers.shuffle();
     inactiveAnswers = incorrectAnswers.getRange(0, 2).map((e) => e.value).toList();
     print(inactiveAnswers);

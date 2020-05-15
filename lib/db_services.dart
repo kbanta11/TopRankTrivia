@@ -106,7 +106,7 @@ class DBService {
   }
 
   Stream<List<Message>> streamUserMessages(User user) {
-    return _db.collection('users').document(user.userId).collection('messages').snapshots().map((QuerySnapshot querySnap) {
+    return _db.collection('users').document(user.userId).collection('messages').orderBy('datesent', descending: true).snapshots().map((QuerySnapshot querySnap) {
       print('QuerySnapshot: $querySnap/${querySnap.documents.length}');
       return querySnap.documents.map((DocumentSnapshot docSnap) => Message.fromFirestore(docSnap)).toList();
     });
@@ -149,6 +149,171 @@ class DBService {
 
   Stream<Game> streamGame(String ladderId, String userId) {
     return _db.collection('games').where('ladder_id', isEqualTo: ladderId).where('user_id', isEqualTo: userId).snapshots().map((snap) => snap.documents.map((doc) => Game.fromFirestore(doc)).first);
+  }
+
+  Stream<List<HeadToHeadGame>> streamHeadToHeadGames(User user) {
+    return _db.collection('head-to-head').where('players', arrayContains: user.userId).orderBy('datestarted', descending: true).snapshots().map((snap) => snap.documents.map((doc) {
+      return HeadToHeadGame.fromFirestore(doc);
+    }).toList());
+  }
+
+  Stream<HeadToHeadGame> streamHeadToHeadGame(String gameId) {
+    return _db.collection('head-to-head').document(gameId).snapshots().map((snap) {
+      print('Streaming game');
+      HeadToHeadGame game = HeadToHeadGame.fromFirestore(snap);
+      print('Streaming game: ${snap.documentID}/$game');
+      return game;
+    });
+  }
+
+  Future<HeadToHeadGame> getHeadToHeadGame(User user, int fee) async {
+    bool isAvailableGames = false;
+    HeadToHeadGame game;
+    //Get existing games for this entry value
+    List<HeadToHeadGame> existingGames = await _db.collection('head-to-head').where('entry_fee', isEqualTo: fee).where('game_finished', isEqualTo: false).orderBy('datestarted').getDocuments().then((snap) {
+      return snap.documents.map((doc) {
+        return HeadToHeadGame.fromFirestore(doc);
+      }).toList();
+    });
+    print('Number of existing games: ${existingGames == null ? '0' : existingGames.length}');
+    //Filter out games this player is already in
+    if(existingGames != null && existingGames.length > 0){
+      existingGames.removeWhere((e) => e.players.contains(user.userId));
+      if(existingGames.length > 0)
+        isAvailableGames = true;
+      print('Number of games from other users: ${existingGames.length}');
+    }
+    if(isAvailableGames) {
+      //If there are available games to be joined, join an existing game
+      print('There are existing games, add user to oldest available unfinished game as player 2!');
+      game = existingGames.first;
+      WriteBatch batch = _db.batch();
+      //Add fields for player 2 to game
+      DocumentReference gameRef = _db.collection('head-to-head').document(game.id);
+      game.players.add(user.userId);
+      game.player2 = user.userId;
+      game.player2Name = user.getDisplayName();
+      game.player2Score = 0;
+      game.player2Bet = 0;
+      game.player2Streak = 1;
+      game.player2Finished = false;
+
+      batch.updateData(gameRef, {
+        'players': game.players,
+        'player2': game.player2,
+        'player2_name': game.player2Name,
+        'player2_score': game.player2Score,
+        'player2_bet': game.player2Bet,
+        'player2_streak': game.player2Streak,
+        'player2_finished': game.player2Finished
+      });
+      //Update user doc to deduct entry fee from coins
+      DocumentReference userReference = _db.collection('users').document(user.userId);
+      batch.updateData(userReference, {
+        'coins': user.coins - game.entryFee,
+        'num_head_to_head': user.numHeadToHead + 1,
+      });
+      await batch.commit();
+      await game.getQuestions();
+    } else {
+      //if not, create a new game and wait for opponent after completing
+      //Get document reference for new game
+      DocumentReference gameRef = _db.collection('head-to-head').document();
+      //Get list of 15 questions
+      List<Question> allQuestions = await _db.collection('questions').where('is_verified', isEqualTo: true).getDocuments().then((snap) {
+        return snap.documents.map((doc) => Question.fromFirestore(doc)).toList();
+      });
+      print('Number of questions: ${allQuestions.length}');
+      List<Question> gameQuestions = List<Question>();
+      while(gameQuestions.length < 16) {
+        int randomQuestionIndex = Random().nextInt(allQuestions.length);
+        Question newGameQuestion = allQuestions[randomQuestionIndex];
+        gameQuestions.add(newGameQuestion);
+        allQuestions.remove(newGameQuestion);
+      }
+      print('Game Question List: $gameQuestions');
+      //add order to questions
+      gameQuestions = gameQuestions.asMap().entries.map((entry) {
+        Question question = entry.value;
+        int index = entry.key;
+        question.order = index;
+        if(index == 15) {
+          question.bonus = true;
+        } else {
+          question.bonus = false;
+        }
+        return question;
+      }).toList();
+
+      //Get bonus question
+      Question bonusQuestion = allQuestions[Random().nextInt(allQuestions.length)];
+
+      //Create game object
+      WriteBatch batch = _db.batch();
+      //Add user to new game and save references
+      game = new HeadToHeadGame(
+        id: gameRef.documentID,
+        entryFee: fee,
+        dateStarted: DateTime.now(),
+        players: [user.userId],
+        gameFinished: false,
+        questions: gameQuestions,
+        player1: user.userId,
+        player1Name: user.getDisplayName(),
+        player1Bet: 0,
+        player1Score: 0,
+        player1Streak: 1,
+        player1Finished: false,
+      );
+      batch.setData(gameRef, {
+        'id': game.id,
+        'entry_fee': game.entryFee,
+        'datestarted': game.dateStarted,
+        'players': game.players,
+        'game_finished': game.gameFinished,
+        'player1': game.player1,
+        'player1_name': game.player1Name,
+        'player1_score': game.player1Score,
+        'player1_bet': game.player1Bet,
+        'player1_streak': game.player1Streak,
+        'player1_finished': game.player1Finished,
+      });
+      //Add all game questions to subcollection of gameref
+      game.questions.forEach((Question question) {
+        DocumentReference questionRef = gameRef.collection('questions').document(question.id);
+        batch.setData(questionRef, {
+          'question_id': question.id,
+          'order': question.order,
+          'difficulty': question.difficulty,
+          'category': question.category,
+          'answer_counts': question.answerCounts,
+          'type': question.type,
+          'question': question.question,
+          'bonus': question.bonus,
+          'correct_answer': question.answers.where((ans) => ans.isCorrect).first.value,
+          'incorrect_answers': question.answers.where((ans) => !ans.isCorrect).map((ans) => ans.value).toList(),
+        });
+      });
+
+      //Update user doc to reflect cost of entry
+      DocumentReference userRef = _db.collection('users').document(user.userId);
+      int currentCoins = await userRef.get().then((snap) => snap.data['coins']);
+      int newCoins = currentCoins - fee;
+      int currentHeadToHeadGamesCount = await userRef.get().then((snap) => snap.data['num_head_to_head']);
+      batch.updateData(userRef, {
+        'coins': newCoins,
+        'num_head_to_head': currentHeadToHeadGamesCount != null && currentHeadToHeadGamesCount > 0 ? currentHeadToHeadGamesCount + 1 : 1,
+      });
+      await batch.commit();
+    }
+    //start game
+    return game;
+  }
+  
+  Future<List<Question>> getGameQuestions(String gameId) async {
+    return await _db.collection('head-to-head').document(gameId).collection('questions').orderBy('order').getDocuments().then((snap) {
+      return snap.documents.map((doc) => Question.fromFirestore(doc)).toList();
+    });
   }
 
   Future<Question> getQuestion(User user) async {
@@ -306,7 +471,7 @@ class DBService {
     int newScore = currentScore;
     int highStreak = game.highStreak;
     bool isAlive = true;
-    if(ans != null && ans.isCcorrect){
+    if(ans != null && ans.isCorrect){
       if(streak == null)
         streak = 1;
       else
@@ -386,6 +551,209 @@ class DBService {
       batch.updateData(questionRef, {'times_answered': timesAnswered, 'answer_counts': answerCounts});
     }
     await batch.commit();
+    return;
+  }
+
+  Future<void> answerQuestionHeadToHead(Answer ans, HeadToHeadGame game, Question question, User user, {bool isBonus}) async {
+    print('${game.id}');
+    WriteBatch batch = _db.batch();
+    DocumentReference gameRef = _db.collection('head-to-head').document(game.id);
+    int currentScore;
+    int streak;
+    int betAmount;
+    await gameRef.get().then((snap) {
+      currentScore = game.player1 == user.userId ? snap.data['player1_score'] : snap.data['player2_score'];
+      streak = game.player1 == user.userId ? snap.data['player1_streak'] : snap.data['player2_streak'];
+      betAmount = game.player1 == user.userId ? snap.data['player1_bet'] : snap.data['player2_bet'];
+    });
+    int newScore;
+    int newStreak;
+    //Check if answer was correct, if so add score for user and increment streak
+    if(ans != null && ans.isCorrect) {
+      newScore = question.bonus ? currentScore + (2*betAmount) : currentScore + streak;
+      newStreak = streak + 1;
+    } else {
+      //if not set streak back to 1
+      newScore = currentScore;
+      newStreak = 1;
+    }
+    Map<String, dynamic> gameData = {
+      'player${game.player1 == user.userId ? '1' : '2'}_score': newScore,
+      'player${game.player1 == user.userId ? '1' : '2'}_streak': newStreak,
+    };
+    if(question.bonus) {
+      if(game.player1 == user.userId) {
+        gameData.addAll({'player1_finished': true});
+      } else {
+        gameData.addAll({'player2_finished': true});
+      }
+    }
+    batch.updateData(gameRef, gameData);
+
+    //Mark question as answered for this user
+    if(question != null) {
+      //Update question for game
+      DocumentReference gameQuestionReference = gameRef.collection('questions').document(question.id);
+      Map<String, dynamic> gameQData = Map<String, dynamic>();
+      if(game.player1 == user.userId) {
+        gameQData['player1_correct'] = ans == null ? false : ans.isCorrect;
+      } else {
+        gameQData['player2_correct'] = ans == null ? false: ans.isCorrect;
+      }
+      if(question.playersAnswered == null) {
+        gameQData['players_answered'] = [user.userId];
+      } else {
+        question.playersAnswered.add(user.userId);
+        gameQData['players_answered'] = question.playersAnswered;
+      }
+      batch.updateData(gameQuestionReference, gameQData);
+
+      //Update question stats for question overall
+      DocumentReference questionRef = _db.collection('questions').document(question.id);
+      int timesAnswered = await questionRef.get().then((value) => value.data['times_answered']);
+      Map answerCounts = await questionRef.get().then((value) => value.data['answer_counts']);
+      if(timesAnswered == null) {
+        timesAnswered = 1;
+      } else {
+        timesAnswered = timesAnswered + 1;
+      }
+      if(ans != null) {
+        if(answerCounts == null) {
+          answerCounts = {ans.value: 1};
+        } else {
+          int answerCnt = answerCounts[ans.value];
+          if(answerCnt == null) {
+            answerCnt = 1;
+          } else {
+            answerCnt = answerCnt + 1;
+          }
+          answerCounts[ans.value] = answerCnt;
+        }
+      }
+      batch.updateData(questionRef, {'times_answered': timesAnswered, 'answer_counts': answerCounts});
+    }
+    await batch.commit();
+    await DBService().endHeadToHeadGame(game);
+    return;
+  }
+
+  Future<void> makeBonusBetHeadToHead(User user, HeadToHeadGame game, int betAmount) async {
+    print('User ${user.userId} is betting $betAmount points on the bonus of game ${game.id}');
+    DocumentReference gameRef = _db.collection('head-to-head').document(game.id);
+    Map<String, dynamic> gameData = Map<String, dynamic>();
+    if(user.userId == game.player1) {
+      //process for player 1
+      gameData['player1_bet'] = betAmount;
+      gameData['player1_score'] = game.player1Score - betAmount;
+    } else {
+      //process for player 2
+      gameData['player2_bet'] = betAmount;
+      gameData['player2_score'] = game.player2Score - betAmount;
+    }
+    await _db.runTransaction((transaction) {
+      return transaction.update(gameRef, gameData);
+    });
+    return null;
+  }
+
+  Future<void> endHeadToHeadGame(HeadToHeadGame game) async {
+    DocumentReference gameRef = _db.collection('head-to-head').document(game.id);
+    HeadToHeadGame updatedGame = await gameRef.get().then((snap) => HeadToHeadGame.fromFirestore(snap));
+    WriteBatch batch = _db.batch();
+    //check if game is finished by both players
+    if(updatedGame.player1 != null && updatedGame.player2 != null && updatedGame.player1Finished && updatedGame.player2Finished) {
+      print('Processing end of game: ${game.id}');
+      //process end of game, update game to mark finished and set winner
+      batch.updateData(gameRef, {
+        'game_finished': true,
+        'winner': updatedGame.player1Score == updatedGame.player2Score ? 'Tie' : updatedGame.player1Score > updatedGame.player2Score ? updatedGame.player1 : updatedGame.player2,
+      });
+
+      //pay out winning user
+      if(updatedGame.player1Score == updatedGame.player2Score) {
+        //Tie - pay each player back their entry fee
+        //Player 1
+        DocumentReference player1Ref = _db.collection('users').document(updatedGame.player1);
+        User player1 = await player1Ref.get().then((snap) => User.fromFirestore(snap));
+        batch.updateData(player1Ref, {
+          'coins': player1.coins + updatedGame.entryFee,
+        });
+        //Player 2
+        DocumentReference player2Ref = _db.collection('users').document(updatedGame.player2);
+        User player2 = await player2Ref.get().then((snap) => User.fromFirestore(snap));
+        batch.updateData(player2Ref, {
+          'coins': player2.coins + updatedGame.entryFee,
+        });
+      } else if (updatedGame.player1Score > updatedGame.player2Score) {
+        //Player 1 wins, payout player 1
+        DocumentReference player1Ref = _db.collection('users').document(updatedGame.player1);
+        User player1 = await player1Ref.get().then((snap) => User.fromFirestore(snap));
+        batch.updateData(player1Ref, {
+          'coins': player1.coins + (updatedGame.entryFee * 2),
+        });
+      } else {
+        //player 2 wins, payout player 2
+        DocumentReference player2Ref = _db.collection('users').document(updatedGame.player2);
+        User player2 = await player2Ref.get().then((snap) => User.fromFirestore(snap));
+        batch.updateData(player2Ref, {
+          'coins': player2.coins + (updatedGame.entryFee * 2),
+        });
+      }
+
+      //send message to both players with results
+      DocumentReference player1MessageRef = _db.collection('users').document(updatedGame.player1).collection('messages').document();
+      DocumentReference player2MessageRef = _db.collection('users').document(updatedGame.player2).collection('messages').document();
+      if(updatedGame.player1Score == updatedGame.player2Score) {
+        //Send tie message to both players
+        batch.setData(player1MessageRef, {
+          'datesent': DateTime.now(),
+          'is_read': false,
+          'game_id': updatedGame.id,
+          'message_subject': 'What?!? A Tie??',
+          'message': 'You\'re Head to Head game with ${updatedGame.player2Name} ended in a tie! You both scored ${game.player1Score} points. You have received your entry fee of ${updatedGame.entryFee} coins back.'
+        });
+        batch.setData(player2MessageRef, {
+          'datesent': DateTime.now(),
+          'is_read': false,
+          'game_id': updatedGame.id,
+          'message_subject': 'What?!? A Tie??',
+          'message': 'You\'re Head to Head game with ${updatedGame.player1Name} ended in a tie! You both scored ${game.player2Score} points. You have received your entry fee of ${updatedGame.entryFee} coins back.'
+        });
+      } else if (updatedGame.player1Score > updatedGame.player2Score) {
+        //Send winning congratulations to player 1 and condolences to player 2
+        batch.setData(player1MessageRef, {
+          'datesent': DateTime.now(),
+          'is_read': false,
+          'game_id': updatedGame.id,
+          'message_subject': 'Victory! Head to Head Winner',
+          'message': 'You beat ${updatedGame.player2Name} in a Head to Head game. You outscored your opponent ${updatedGame.player1Score} to ${updatedGame.player2Score}. You won ${updatedGame.entryFee * 2} coins!'
+        });
+        batch.setData(player2MessageRef, {
+          'datesent': DateTime.now(),
+          'is_read': false,
+          'game_id': updatedGame.id,
+          'message_subject': 'You Were Defeated!',
+          'message': 'You were beaten by ${updatedGame.player1Name} in a Head to Head game. You were outscored by your opponent ${updatedGame.player1Score} to ${updatedGame.player2Score}. You lost ${updatedGame.entryFee} coins!'
+        });
+      } else {
+        //Send winning congratulations to player 2 and condolences to player 1
+        batch.setData(player2MessageRef, {
+          'datesent': DateTime.now(),
+          'is_read': false,
+          'game_id': updatedGame.id,
+          'message_subject': 'Victory! Head to Head Winner',
+          'message': 'You beat ${updatedGame.player1Name} in a Head to Head game. You outscored your opponent ${updatedGame.player2Score} to ${updatedGame.player1Score}. You won ${updatedGame.entryFee * 2} coins!'
+        });
+        batch.setData(player1MessageRef, {
+          'datesent': DateTime.now(),
+          'is_read': false,
+          'game_id': updatedGame.id,
+          'message_subject': 'You Were Defeated!',
+          'message': 'You were beaten by ${updatedGame.player2Name} in a Head to Head game. You were outscored by your opponent ${updatedGame.player2Score} to ${updatedGame.player1Score}. You lost ${updatedGame.entryFee} coins!'
+        });
+      }
+      batch.commit();
+    }
     return;
   }
 

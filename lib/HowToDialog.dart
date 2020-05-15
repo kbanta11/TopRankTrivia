@@ -5,6 +5,7 @@ class HowToDialog extends StatelessWidget {
   @override
   build(BuildContext context) {
     return SimpleDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
       contentPadding: EdgeInsets.fromLTRB(10, 10, 10, 10),
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

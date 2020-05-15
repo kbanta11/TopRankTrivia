@@ -16,7 +16,13 @@ class MessagesDialog extends StatelessWidget {
       value: DBService().streamUserMessages(user),
       child: Consumer<List<Message>>(
         builder: (context, messageList, _) {
+          messageList.sort((a, b) {
+            int order = a.dateSent.compareTo(b.dateSent);
+            print('Date 1: ${a.dateSent}/Date 2: ${b.dateSent}/Order: $order');
+            return -order;
+          });
           return SimpleDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -30,12 +36,13 @@ class MessagesDialog extends StatelessWidget {
               ],
             ),
             children: messageList == null ? [Center(child: Text('You have no messages.'))] : messageList.map((message) {
+              print('Message datesent: ${message.dateSent}');
               return Column(
                 children: <Widget>[
                   Divider(height: 2.5,),
                   ListTile(
                     title: Text(message.subject),
-                    subtitle: Text(Helper().dateTimeToStringShort(message.ladderEndDate)),
+                    subtitle: Text(Helper().dateTimeToStringShort(message.dateSent)),
                     trailing: IconButton(
                         icon: message.isRead ? Icon(Icons.mail_outline, color: Colors.black26,) : Icon(Icons.mail, color: Colors.green),
                         onPressed: () {
@@ -47,6 +54,7 @@ class MessagesDialog extends StatelessWidget {
                         context: context,
                         builder: (BuildContext context) {
                           return SimpleDialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
                             contentPadding: EdgeInsets.all(10),
                             title: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -64,8 +72,8 @@ class MessagesDialog extends StatelessWidget {
                               Text('Subject:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
                               Text(message.subject, style: TextStyle(fontSize: 16)),
                               SizedBox(height: 8),
-                              Text('Ladder Ended:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                              Text(Helper().dateTimeToStringShort(message.ladderEndDate), style: TextStyle(fontSize: 16)),
+                              Text('${message.ladderEndDate != null ? 'Ladder' : 'Game'} Ended:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                              Text(message.ladderEndDate != null ? Helper().dateTimeToStringShort(message.ladderEndDate) : Helper().dateTimeToStringShort(message.dateSent), style: TextStyle(fontSize: 16)),
                               SizedBox(height: 8),
                               Text('Message:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                               Text(message.message, style: TextStyle(fontSize: 16)),

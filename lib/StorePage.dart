@@ -117,59 +117,6 @@ class StorePage extends StatelessWidget {
                     ],
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    OutlineButton(
-                      color: Colors.cyan,
-                      borderSide: BorderSide(width: 2, color: Colors.cyan),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25))),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Container(
-                            height: 25,
-                            width: 25,
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: AssetImage('assets/images/LadderIcon-Blue.png')
-                              )
-                            )
-                          ),
-                          SizedBox(width: 5),
-                          Text('ladders', style: TextStyle(color: Colors.cyan, fontSize: 22))
-                        ],
-                      ),
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage()));
-                      },
-                    ),
-                    SizedBox(width: 25),
-                    FlatButton(
-                      color: Colors.cyan,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25))),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Container(
-                            height: 25,
-                            width: 25,
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: AssetImage('assets/images/ShoppingCart-White.png')
-                              )
-                            )
-                          ),
-                          SizedBox(width: 5),
-                          Text('store', style: TextStyle(color: Colors.white, fontSize: 22))
-                        ],
-                      ),
-                      onPressed: () {
-
-                      },
-                    )
-                  ],
-                ),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
@@ -809,7 +756,8 @@ class StorePage extends StatelessWidget {
                       ],
                     ),
                   ),
-                )
+                ),
+                BottomNavBar(context: context, selected: 'store',)
               ],
             ),
           );

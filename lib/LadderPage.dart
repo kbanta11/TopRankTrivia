@@ -196,62 +196,6 @@ class LadderPage extends StatelessWidget {
                                   ],
                                 )
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                OutlineButton(
-                                  color: Colors.cyan,
-                                  borderSide: BorderSide(color: Colors.cyan, width: 2),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(Radius.circular(25))
-                                  ),
-                                  child: Row(
-                                    children: <Widget>[
-                                      Container(
-                                        width: 25,
-                                        height: 25,
-                                        decoration: BoxDecoration(
-                                          image: DecorationImage(
-                                            image: AssetImage('assets/images/LadderIcon-Blue.png')
-                                          )
-                                        )
-                                      ),
-                                      SizedBox(width: 5),
-                                      Text('ladders', style: TextStyle(color: Colors.cyan, fontSize: 22),)
-                                    ],
-                                  ),
-                                  onPressed: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage()));
-                                  },
-                                ),
-                                SizedBox(width: 15),
-                                OutlineButton(
-                                  color: Colors.cyan,
-                                  borderSide: BorderSide(color: Colors.cyan, width: 2),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(Radius.circular(25))
-                                  ),
-                                  child: Row(
-                                    children: <Widget>[
-                                      Container(
-                                          width: 25,
-                                          height: 25,
-                                          decoration: BoxDecoration(
-                                              image: DecorationImage(
-                                                  image: AssetImage('assets/images/ShoppingCart-Blue.png')
-                                              )
-                                          )
-                                      ),
-                                      SizedBox(width: 5),
-                                      Text('store', style: TextStyle(color: Colors.cyan, fontSize: 22),)
-                                    ],
-                                  ),
-                                  onPressed: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => StorePage()));
-                                  },
-                                ),
-                              ],
-                            ),
                             Expanded(
                               child: gamesList == null ? Container() : ListView(
                                 children: gamesList.asMap().entries.map((entry) {
@@ -500,32 +444,40 @@ class LadderPage extends StatelessWidget {
                                               crossAxisAlignment: CrossAxisAlignment.center,
                                               children: <Widget>[
                                                 Text('${timeLeft.inHours > 0 ? '${timeLeft.inHours}:' : ''}${timeLeft.inMinutes.remainder(60).toString().padLeft(2, '0')}:${timeLeft.inSeconds.remainder(60).toString().padLeft(2, '0')}', style: TextStyle(fontSize: 24, color: Colors.white),),
-                                                IconButton(
-                                                  icon: Icon(Icons.ondemand_video, color: Colors.white,),
-                                                  padding: EdgeInsets.all(0),
-                                                  onPressed:  () async {
-                                                    showDialog(
-                                                        context: context,
-                                                        builder: (BuildContext context) {
-                                                          return Center(
-                                                            child: CircularProgressIndicator(),
-                                                          );
+                                                SizedBox(width: 5),
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: Colors.deepOrangeAccent,
+                                                  ),
+                                                  child: IconButton(
+                                                    color: Colors.deepOrangeAccent,
+                                                    icon: Icon(Icons.ondemand_video, color: Colors.white,),
+                                                    padding: EdgeInsets.all(0),
+                                                    onPressed:  () async {
+                                                      showDialog(
+                                                          context: context,
+                                                          builder: (BuildContext context) {
+                                                            return Center(
+                                                              child: CircularProgressIndicator(),
+                                                            );
+                                                          }
+                                                      );
+                                                      RewardedVideoAd.instance.listener = (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}) {
+                                                        if(event == RewardedVideoAdEvent.rewarded) {
+                                                          print('skip waiting, go to playing game');
+                                                          Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                                            return PlayPage(ladder: ladder);
+                                                          }));
                                                         }
-                                                    );
-                                                    RewardedVideoAd.instance.listener = (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}) {
-                                                      if(event == RewardedVideoAdEvent.rewarded) {
-                                                        print('skip waiting, go to playing game');
-                                                        Navigator.push(context, MaterialPageRoute(builder: (context) {
-                                                          return PlayPage(ladder: ladder);
-                                                        }));
-                                                      }
-                                                      if(event == RewardedVideoAdEvent.loaded) {
-                                                        Navigator.of(context).pop();
-                                                        RewardedVideoAd.instance.show();
-                                                      }
-                                                    };
-                                                    await RewardedVideoAd.instance.load(adUnitId: 'ca-app-pub-5887055143640982/8644124935' ?? RewardedVideoAd.testAdUnitId, targetingInfo: MobileAdTargetingInfo(testDevices: ['2A964E13F4310B0C3E0B13C89E35FD98','2EAF3CA98C317AA4482F535CA1094A23', 'F358A854E8C08E90BDD900D8B4B97846', '75199624E49A48A7E1B223CA92726059']));
-                                                  },
+                                                        if(event == RewardedVideoAdEvent.loaded) {
+                                                          Navigator.of(context).pop();
+                                                          RewardedVideoAd.instance.show();
+                                                        }
+                                                      };
+                                                      await RewardedVideoAd.instance.load(adUnitId: 'ca-app-pub-5887055143640982/8644124935' ?? RewardedVideoAd.testAdUnitId, targetingInfo: MobileAdTargetingInfo(testDevices: ['2A964E13F4310B0C3E0B13C89E35FD98','2EAF3CA98C317AA4482F535CA1094A23', 'F358A854E8C08E90BDD900D8B4B97846', '75199624E49A48A7E1B223CA92726059']));
+                                                    },
+                                                  ),
                                                 ),
                                               ],
                                             );
@@ -568,7 +520,8 @@ class LadderPage extends StatelessWidget {
                                   )
                                 ],
                               ),
-                            )
+                            ),
+                            BottomNavBar(context: context,),
                           ]
                       ),
                     );
