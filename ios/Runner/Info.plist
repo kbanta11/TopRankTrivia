@@ -25,6 +25,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>com.googleusercontent.apps.747289854650-qtg62alijltfohoncut4os5qf12fpf4i</string>
 				<string>fb643081196458812</string>
 			</array>
 		</dict>

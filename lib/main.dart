@@ -588,7 +588,7 @@ class BottomNavBar extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: 7),
-                      Text('Ladders', style: TextStyle(fontSize: 18, color: selected == 'ladders' ? Colors.white : Colors.cyan),)
+                      Text('Ladders', style: TextStyle(fontSize: 16, color: selected == 'ladders' ? Colors.white : Colors.cyan),)
                     ],
                   ),
                   //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
@@ -609,7 +609,7 @@ class BottomNavBar extends StatelessWidget {
                 child: Column(
                     children: <Widget>[
                       Icon(Icons.people, size: 30, color: selected == 'head' ? Colors.white : Colors.cyan,),
-                      Text('1 v 1', style: TextStyle(fontSize: 18, color: selected == 'head' ? Colors.white : Colors.cyan))
+                      Text('1 v 1', style: TextStyle(fontSize: 16, color: selected == 'head' ? Colors.white : Colors.cyan))
                     ]
                 ),
                 onPressed: () {
@@ -630,7 +630,7 @@ class BottomNavBar extends StatelessWidget {
                     children: <Widget>[
                       //Icon(Icons.offline_bolt),
                       FaIcon(FontAwesomeIcons.bolt, color: selected == 'blitz' ? Colors.white : Colors.cyan,),
-                      Text('Blitz', style: TextStyle(fontSize: 18, color: selected == 'blitz' ? Colors.white : Colors.cyan))
+                      Text('Blitz', style: TextStyle(fontSize: 16, color: selected == 'blitz' ? Colors.white : Colors.cyan))
                     ],
                   ),
                   onPressed: () {
@@ -657,7 +657,7 @@ class BottomNavBar extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: 7),
-                      Text('Store', style: TextStyle(fontSize: 18, color: selected == 'store' ? Colors.white : Colors.cyan))
+                      Text('Store', style: TextStyle(fontSize: 16, color: selected == 'store' ? Colors.white : Colors.cyan))
                     ],
                   ),
                   //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),

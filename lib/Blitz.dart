@@ -121,7 +121,7 @@ class TriviaBlitzPage extends StatelessWidget {
                           ),
                         ),
                         Expanded(
-                            child: Center(child: Text('There are no Trivia Blitz games available right now.', style: TextStyle(fontSize: 18)))
+                            child: Center(child: Text('There are no Trivia Blitz games available right now.', style: TextStyle(fontSize: 18), textAlign: TextAlign.center,))
                         ),
                         BottomNavBar(selected: 'blitz',),
                       ],
