@@ -176,9 +176,9 @@ class DBService {
       }).toList();
     });
     print('Number of existing games: ${existingGames == null ? '0' : existingGames.length}');
-    //Filter out games this player is already in
+    //Filter out games this player is already in and games with 2 players already (need to check more than just player list, in case game is in progress and already has two players)
     if(existingGames != null && existingGames.length > 0){
-      existingGames.removeWhere((e) => e.players.contains(user.userId));
+      existingGames.removeWhere((e) => e.players.contains(user.userId) || (e.player1 != null && e.player2 != null));
       if(existingGames.length > 0)
         isAvailableGames = true;
       print('Number of games from other users: ${existingGames.length}');
